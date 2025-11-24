@@ -1,0 +1,24 @@
+# --- macOS ---
+.DS_Store
+
+# --- Xcode (iOS) ---
+ios/*.derivedData
+ios/*.xcuserstate
+ios/Breakpoints_v2.xcbkptlist
+ios/*.xcworkspace
+!ios/*.xcworkspace/contents.xcworkspacedata
+ios/Pods/
+
+# --- Gradle & Java (Backend) ---
+backend/.gradle/
+backend/build/
+backend/out/
+backend/*.ipr
+backend/*.iws
+backend/*.ws
+backend/.idea/
+backend/*.log
+
+# --- Docker ---
+docker/mysql-data/
+docker/redis-data/
