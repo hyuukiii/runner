@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class) // 생성일/수정일 자동 관리 리스너
-public class Users {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,10 +65,13 @@ public class Users {
     private LocalDateTime updatedAt;
 
     // 생성자
-    public Users(String appleUserId, String nickname, String email) {
+    public User(String appleUserId, String nickname, String email, Gender gender, Integer birthYear, String region) {
         this.appleUserId = appleUserId;
         this.nickname = nickname;
         this.email = email;
+        this.gender = gender;
+        this.birthYear = birthYear;
+        this.region = region;
         this.tier = UserTier.STARTER;
     }
 }
