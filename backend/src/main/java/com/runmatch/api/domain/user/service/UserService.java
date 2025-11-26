@@ -23,7 +23,7 @@ public class UserService {
     @Transactional
     public Long join(UserJoinRequest request) {
         // 1. 중복 체크
-        if (userRepository.findbyAppleUserId(request.getAppleUserId()).isPresent()) {
+        if (userRepository.findByAppleUserId(request.getAppleUserId()).isPresent()) {
             throw new IllegalArgumentException("이미 가입된 사용자입니다.");
         }
 
