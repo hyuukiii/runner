@@ -64,7 +64,12 @@ public class User {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    // 생성자
+    // 러닝 기록 업데이트 후 티어 변경시 저장 되는 생성자 메서드
+    public void updateTier(UserTier newtier){
+        this.tier = newtier;
+    }
+
+    // 생성자 메서드
     public User(String appleUserId, String nickname, String email, Gender gender, Integer birthYear, String region) {
         this.appleUserId = appleUserId;
         this.nickname = nickname;
