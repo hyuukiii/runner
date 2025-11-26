@@ -17,50 +17,58 @@ public class RunningService {
     private final RunningRecordRepository runningRepository;
     private final UserRepository userRepository;
 
-
     /**
-     * @param userId, distance, duration, calories
-     * 러닝 기록 저장 및 티어 업데이트
+     * 총 기록 저장 메서드
+     * @param userId
+     * @param distance
+     * @param duration
+     * @param calories
+     * @return
      */
     @Transactional
     public Long saveRecord(Long userId, Double distance, Integer duration, Double calories) {
 
-        // 1. 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        // 2. 기록 저장
-        RunningRecord record = new RunningRecord(user, distance, duration, calories);
-        runningRepository.save(record);
-
-        // 3. 티어 심사 (이번 기록 포함해서 총 거리 계산)
-        updateUserTier(user);
+        User user = findUserById(userId);
+        RunningRecord record = saveRunningRecord(user, distance, duration, calories);
+        processTierUpdate(user);
 
         return record.getId();
     }
 
+    /**
+     * 사용자 조회 메서드
+     * @param userId
+     * @return
+     */
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 읍따"));
+    }
 
     /**
-     * 티어 업데이트 로직
+     * 유저의 러닝 기록 저장 메서드
+     * @param user
+     * @param distance
+     * @param duration
+     * @param calories
+     * @return
+     */
+    private RunningRecord saveRunningRecord(User user, Double distance, Integer duration, Double calories) {
+        RunningRecord record = new RunningRecord(user, distance, duration, calories);
+        return runningRepository.save(record);
+    }
+
+    /**
+     * 티어 선정 알고리즘 메서드 ( 임시 )
      * @param user
      */
-    private void updateUserTier(User user) {
-
-        // [Refactor] 2025.11.26 성능 최적화
-        // 기존: Java 메모리에서 전체 리스트를 조회 후 계산 (데이터 많아지면 메모리 부족 위험)
-        // 변경: DB에서 SUM 쿼리로 결과만 가져오도록 변경 (네트워크/메모리 절약)
-
-        /* --- Legacy Code (Java 계산 방식) ---
-        List<RunningRecord> records = runningRecordRepository.findByUserId(user.getId());
-        double totalDistance = records.stream()
-                .mapToDouble(RunningRecord::getDistance)
-                .sum();
-        ----------------------------------- */
+    private void processTierUpdate(User user) {
 
         // DB가 계산한 숫자 하나만 받아옴
         Double totalDistance = runningRepository.sumDistnaceByUserId(user.getId());
 
-        // 티어 기준 (임시 : 50, 100 km )
+        // 티어 기준 (임시 : 50, 100 km)
+        // TODO : 티어 계산 로직 복잡 해지면 메서드나 도메인 객체로 분리 하기
         if(totalDistance >= 100) {
             user.updateTier(UserTier.ELITE);
         } else if (totalDistance >= 50) {
@@ -69,4 +77,5 @@ public class RunningService {
             user.updateTier(UserTier.STARTER);
         }
     }
+
 }
