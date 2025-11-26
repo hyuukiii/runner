@@ -35,6 +35,8 @@ public class RunningService {
         return record.getId();
     }
 
+    // === '일꾼' 메서드들 (private) ===
+
     /**
      * 사용자 조회 메서드
      * @param userId
@@ -60,6 +62,9 @@ public class RunningService {
 
     /**
      * 티어 선정 알고리즘 메서드 ( 임시 )
+     * TODO : ** 티어 계산 로직 복잡 해지면 메서드나 도메인 객체로 분리 하기 **
+     *              티어 산정 로직이 3초가 걸린다고 쳐보자. 굳이 "저장 성공" 응답을 3초나 늦게 줄 필요가 있을까?
+     *              저장은 바로 끝내고, 티어는 나중에 계산해도 되잖아?
      * @param user
      */
     private void processTierUpdate(User user) {
@@ -68,7 +73,6 @@ public class RunningService {
         Double totalDistance = runningRepository.sumDistnaceByUserId(user.getId());
 
         // 티어 기준 (임시 : 50, 100 km)
-        // TODO : 티어 계산 로직 복잡 해지면 메서드나 도메인 객체로 분리 하기
         if(totalDistance >= 100) {
             user.updateTier(UserTier.ELITE);
         } else if (totalDistance >= 50) {
