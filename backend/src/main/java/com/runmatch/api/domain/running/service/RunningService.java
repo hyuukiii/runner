@@ -81,5 +81,4 @@ public class RunningService {
             user.updateTier(UserTier.STARTER);
         }
     }
-
 }

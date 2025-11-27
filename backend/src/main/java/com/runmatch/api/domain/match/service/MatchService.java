@@ -19,7 +19,8 @@ public class MatchService {
     /**
      * 매칭 후보 추천
      * < 임시 > 나와 같은 티어인 사람들을 무작위로 보여주는 로직 (일단은 전체 조회)
-     * TODO : 추후 사용자 임의로 필터 기능 추가
+     * TODO : 1. 추후 사용자 임의로 필터 기능 추가
+     *        2. 초기 프로덕션에선 위치 기반으로 매칭 후보 추천 해줄거임
      */
     public List<CandidateResponse> getCandidates(Long myUserId) {
 
