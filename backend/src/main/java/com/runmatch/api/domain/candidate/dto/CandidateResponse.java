@@ -1,4 +1,4 @@
-package com.runmatch.api.domain.match.dto;
+package com.runmatch.api.domain.candidate.dto;
 
 import com.runmatch.api.domain.user.entity.User;
 import com.runmatch.api.domain.user.entity.UserTier;
