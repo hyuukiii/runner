@@ -4,6 +4,9 @@ import com.runmatch.api.domain.user.entity.User;
 import com.runmatch.api.domain.user.entity.UserTier;
 import lombok.Data;
 
+/**
+ * 나와 같은 조건의 사용자
+ */
 @Data
 public class CandidateResponse {
 
