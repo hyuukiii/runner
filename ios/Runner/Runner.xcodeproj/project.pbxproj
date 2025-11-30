@@ -99,10 +99,10 @@
 				};
 			};
 			buildConfigurationList = AEE915B92EDAAE4900FFCC8D /* Build configuration list for PBXProject "Runner" */;
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
+				ko,
 				Base,
 			);
 			mainGroup = AEE915B52EDAAE4900FFCC8D;
@@ -278,7 +278,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.runner.Runner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hyunki.RunMatching;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -309,7 +309,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.runner.Runner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hyunki.RunMatching;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
