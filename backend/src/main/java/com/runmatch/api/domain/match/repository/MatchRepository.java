@@ -5,8 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MatchRepository extends JpaRepository<Match, Long> {
 
-    /**
-     *  TODO :: 일단 저장만 할거라 쿼리 필요 X
-     **/
-
-}
+} // TODO :: 일단 저장만 할거라 쿼리 필요 X

@@ -1,0 +1,29 @@
+spring: # <<< 최상위 spring: 키는 단 하나만 사용합니다.
+  application:
+    name: runner-api
+
+  # --- MySQL 데이터베이스 설정 ---
+  datasource:
+    url: jdbc:mysql://localhost:3306/runmatch?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: user
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # --- JPA (Hibernate) 설정 ---
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  # --- Redis 설정 ---
+  data: # data 설정도 spring 아래에 포함됩니다.
+    redis:
+      host: localhost
+      port: 6379
+
+# --- 로그 설정은 spring 블록 밖, 최상위에 정의되어야 합니다. ---
+logging:
+  level:
+    org.hibernate.SQL: debug
