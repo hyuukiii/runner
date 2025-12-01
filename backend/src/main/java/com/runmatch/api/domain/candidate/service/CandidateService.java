@@ -1,11 +1,6 @@
-package com.runmatch.api.domain.candidate.Service;
+package com.runmatch.api.domain.candidate.service;
 
 import com.runmatch.api.domain.candidate.dto.CandidateResponse;
-import com.runmatch.api.domain.match.entity.ActionType;
-import com.runmatch.api.domain.match.entity.Match;
-import com.runmatch.api.domain.match.entity.UserAction;
-import com.runmatch.api.domain.match.repository.MatchRepository;
-import com.runmatch.api.domain.match.repository.UserActionRepository;
 import com.runmatch.api.domain.user.entity.User;
 import com.runmatch.api.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,13 +30,16 @@ public class CandidateService {
         User me = userRepository.findById(myUserId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없음"));
 
+        // 2. DB에서 이미 DTO로 변환되서 나왔기에 변환 로직 필요 없음
+        return userRepository.findCandidatesByTier(myUserId, me.getTier());
+
         // 2. 나와 같은 티어면서, 나 자신은 아닌 사람들 조회
-        List<User> candidates = userRepository.findByIdNotAndTier(myUserId, me.getTier());
+        // List<User> candidates = userRepository.findByIdNotAndTier(myUserId, me.getTier());
 
         // 3. DTO로 변환해서 반환
-        return candidates.stream()
-                .map(CandidateResponse::from)
-                .collect(Collectors.toList());
+        // return candidates.stream()
+                //.map(CandidateResponse::from)
+                //.collect(Collectors.toList());
     }
 
 }
