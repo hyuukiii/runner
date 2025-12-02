@@ -24,7 +24,9 @@ class HealthKitManager: ObservableObject {
         HKObjectType.quantityType(forIdentifier: .heartRate)!               // 심박수
     ]
     
-    // 헬스킷 권한 요청 함수 (해당 함수 UI에서 호출)
+    /**
+           헬스킷 권한 요청 함수 (해당 함수 UI에서 호출)
+    **/
     func requestAuthorization() {
         
         // 1. 이 기기가 HelathKit을 지원하는지 확인(아이패드는 안 됨)
@@ -54,6 +56,9 @@ class HealthKitManager: ObservableObject {
             3개월 전 ~ 오늘 까지의 실제  러닝데이터 불러오기
      **/
     func fetchRunningStats() {
+
+        // guard : 걷기 달리기 거리 데이터 타입 확인
+        // 옵셔녈 바인딩 : 값이 nil인지 아닌지 확인 --> 가져오지 못하면 return
         guard let runningType = HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning) else { return }
         
         // 3개월 전부터 ~ 오늘까지 날짜 정하기
@@ -73,7 +78,15 @@ class HealthKitManager: ObservableObject {
             let sum = result?.sumQuantity()
             let distance = sum?.doubleValue(for: HKUnit.meter()) ?? 0.0
             
-            print("지난 3개월 동안 \(distance) 미터 만큼 뛰었어요 대단하시네요!")
+            print("아이폰 측정 거리: \(distance) 미터")
+            
+            // 서버로 전송하기
+            // 유저 ID 1번으로 보냄(포스트맨으로 만들었던 유저임)
+            APIManager.shared.uploadRunningRecord(userId: 1, distance: distance) { success in
+                if success {
+                    print("모든 과정 완료! DB를 확인해서 올바르게 데이터 저장 됐는지 확인!")
+                }
+            }
             
         }
         
