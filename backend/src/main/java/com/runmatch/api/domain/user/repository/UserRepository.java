@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsBynickname(String nickname);
 
     // [최적화] 엔티티 대신 DTO 리스트를 바로 반환
-    @Query ("SELECT new com.runmatch.api.domain.candidate.dto.candidateResponse(u.id, u.nickname, u.tier, u.region)" +
+    @Query ("SELECT new com.runmatch.api.domain.candidate.dto.CandidateResponse(u.id, u.nickname, u.tier, u.region)" +
              "FROM User u " +
              "WHERE u.id != :myId AND u.tier = :tier")
     List<CandidateResponse> findCandidatesByTier(@Param("myId") Long myId, @Param("tier") UserTier tier);

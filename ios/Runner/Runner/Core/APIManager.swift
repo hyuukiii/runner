@@ -24,7 +24,7 @@ class APIManager {
         // 1. URL 설정
         guard let url = URL(string: "\(baseURL)/running/record") else{return}
         
-        // 2. 요청(Request) 만들기 ( 해당 코드 3줄 물어보기 )
+        // 2. 요청(Request) 만들기
         // var를 쓴 이유는 구조체이기 떄문에 내용 수정을 위해 변수로 선언
         // request.httpMethod = "POST" ==> 아무것도 안적으면 기본값(GET)임
         // "application/json"          ==> 이 안에는 일반 텍스트나 이미지X, JSON 형식의 데이터가 있음을 명시
@@ -52,17 +52,20 @@ class APIManager {
             print("Swift딕셔너리 === JSON로 변환 실패 : \(error)")
             return
         }
-        
+        		
         // 4. 전송 시작 (URLSession)
         URLSession.shared.dataTask(with: request) { data, response, error in
+            
             if let error = error {
                 print("서버 통신 에러:\(error.localizedDescription)")
                 completion(false)
                 return
+                
             }
             
             // as?가 뭔지 물어보기
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                
                 print("서버 업로드 성공! (200 OK)")
                 // 응답 데이터 확인 (String)
                 if let data = data, let responseString = String(data: data,encoding: .utf8) {
@@ -73,8 +76,8 @@ class APIManager {
                 print("서버 응답 실패(Status Code가 200이 아님)")
                 completion(false)
             }
+            
         }.resume()
-        
         
     }
 }
