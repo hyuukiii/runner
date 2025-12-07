@@ -33,8 +33,16 @@ struct HealthAuthView: View {
             // 2. 버튼을 누르면 헬스킷 매니저에 적용한 코드를 호출한다.
             Button(action: {
                 hkManager.requestAuthorization()
+                
+                // 약간의 딜레이 후 메인화면으로 전환
+                // TODO: hkManager 안에서 성공 콜백을 받도록 개선 하기, 현재는 간단하게 버튼 누르면 1초 뒤에 넘어가게 구현
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    // 모든 절차 완료 메인으로 이동
+                    UserManager.shared.currentUserId = 1
+                }
+                
             }) {
-                Text("건강앱과 빠르게 연동 하세요!")
+                Text("연동하기")
                     .font(.headline)
                     .foregroundColor(.white)
                     .padding()

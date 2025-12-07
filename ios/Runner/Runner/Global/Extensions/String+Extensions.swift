@@ -14,7 +14,6 @@ extension String {
         return self.trimmingCharacters(in: .whitespaces).lowercased()
     }
     
-    
     var sanitizedCode: String {
         return self.trimmingCharacters(in: .whitespaces)
     }

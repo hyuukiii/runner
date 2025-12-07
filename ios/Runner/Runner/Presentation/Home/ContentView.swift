@@ -17,7 +17,7 @@ struct ContentView: View {
             HealthAuthView()
         } else {
             // 2. 로그인이 안 되어 있다면 -> 로그인 화면으로
-            LoginView()
+            LoginFlowView()
         }
     }
 }
