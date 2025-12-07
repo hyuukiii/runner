@@ -13,12 +13,16 @@ class APIManager {
     static let shared = APIManager()
     
     // 서버 주소 (시뮬레이터에서 맥북 localhost는 localhost로 통함)
+    // http://192.168.0.167:8080 http://localhost:8080
     let baseURL = "http://localhost:8080"
     
-    // 러닝 기록 업로드 함수
-    // completion : 완료되면 실행할 것, @escaping : 탈출한다
-    // (Bool) : 성공/실패(True/false) 반환
-    // Void   : 결과 반환 x, 할 일만 하고 끝냄
+    
+    /**
+      * 러닝 기록 업로드 함수
+      * completion : 완료되면 실행할 것, @escaping : 탈출한다
+      * (Bool) : 성공/실패(True/false) 반환
+      * Void   : 결과 반환 x, 할 일만 하고 끝냄
+    **/
     func uploadRunningRecord(userId : Int, distance: Double, completion: @escaping (Bool) -> Void) {
         
         // 1. URL 설정
@@ -56,7 +60,7 @@ class APIManager {
                 
             }
             
-            // as?가 뭔지 물어보기
+            //200코드 발생 시 로직
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 
                 print("서버 업로드 성공! (200 OK)")
@@ -78,7 +82,7 @@ class APIManager {
         1. 이메일 인증번호 요청 (POST / auth/ send-code)
      */
     func sendVerificationCode(email: String, completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "/(baseURL)/auth/send-code") else { return }
+        guard let url = URL(string: "\(baseURL)/auth/send-code") else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -107,7 +111,7 @@ class APIManager {
                 print("발송 실패(status code를 확인)")
                 completion(false)
             }
-        }
+        }.resume()
     } // sendVerificationCode
     
     /**

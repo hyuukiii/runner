@@ -1,6 +1,7 @@
 package com.runmatch.api.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,14 +20,18 @@ public class AuthService {
      * 인증번호 발송
      */
     public void sendVerficationCode(String email) {
+        //공백제거 & 소문자 변환
+        String safeEmail = email.trim().toLowerCase();
         // 인증번호 생성 (100000 ~ 999999)
         String code = createCode();
 
         // Redis에 저장 (Key : "AUTH : 이메일 ", Value: "123456", 유효시간 : 3분)
-        redisTemplate.opsForValue().set("Auth:"+ email, code, Duration.ofMinutes(3));
+        redisTemplate.opsForValue().set("AUTH:"+ safeEmail, code, Duration.ofMinutes(3));
+        // 로그 확인용
+        System.out.println("✅ [Redis 저장] 키: AUTH:" + safeEmail + ", 코드: " + code);
 
         // 이메일 전송
-        sendEmail(email, code);
+        sendEmail(safeEmail, code);
 
     }
 
@@ -34,7 +39,15 @@ public class AuthService {
      * 인증번호 검증
      */
     public boolean verfiyCode(String email, String inputCode) {
-        String savedCode = redisTemplate.opsForValue().get("AUTH:" + email);
+        // 공백제거 & 소문자 변환
+        String safeEmail = email.trim().toLowerCase();
+        String safeCode = inputCode.trim();
+
+        String redisKey = "AUTH:" + safeEmail;
+        String savedCode = redisTemplate.opsForValue().get(redisKey);
+
+        // 로그 확인용
+        System.out.println("🔎 [Redis 조회] 키: " + redisKey + " -> 값: " + savedCode);
 
         // 코드가 존재하고 입력값과 일치하면 통과
         if (savedCode != null && savedCode.equals(inputCode)) {

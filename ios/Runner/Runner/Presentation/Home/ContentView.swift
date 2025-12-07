@@ -16,14 +16,12 @@ struct ContentView: View {
             // 1. 로그인이 되어 있다면 -> 헬스킷 연동 화면으로
             HealthAuthView()
         } else {
-            // 2. 로그인이 안 되어 있다면 -> 애플 로그인 화면으로
-            OnboardingView()
+            // 2. 로그인이 안 되어 있다면 -> 로그인 화면으로
+            LoginView()
         }
     }
 }
     
-    
-
 #Preview {
     ContentView()
 }
