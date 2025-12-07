@@ -3,7 +3,7 @@
 //  Runner
 //
 //  Created by 윤현기 on 12/7/25.
-//
+// 로그인 플로우 관리자
 
 import SwiftUI
 
@@ -17,7 +17,7 @@ struct LoginFlowView: View {
             
             // 1. 첫 화면: 이메일 입력
             EmailInputView(viewModel: viewModel)
-                // 경로 처리: .codeInput 신호가 오면 CodeInputView로 이동해라
+                // 경로 처리: .codeInput 신호가 오면 CodeInputView로 이동
                 .navigationDestination(for: LoginStep.self) { step in
                     switch step {
                     case .email:

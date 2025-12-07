@@ -12,29 +12,48 @@ class LoginViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var code: String = ""
     
-    // 화면 이동 경로 (이 배열에 값을 넣으면 화면이 바뀜)
-    @Published var navigationPath: [LoginStep] = []
+    @Published var navigationPath: [LoginStep] = [] // 화면 이동 경로 (이 배열에 값을 넣으면 화면이 바뀜)
+    
+    
+    @Published var errorMessage: String = "" // 에러 메시지 저장용 변수
+    @Published var showError: Bool = false  // 에러 메시지 보여줄지 말지 결정
+    
+    /**
+      * 이메일 형식 검사 하는 정규식 함수
+     */
+    func isValidEmail(_ email: String) -> Bool {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPred  = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailPred.evaluate(with: email)
+    }
     
     /**
       * 이메일 전송
      **/
     func sendCode() {
-        // 이메일 소문자로 변경
+        // 이메일 소문자변환
         let cleanEmail = email.sanitizedEmail
+        if !isValidEmail(cleanEmail) {
+            errorMessage = "이메일을 다시 확인해주세요"
+            showError = true
+            return
+        }
         
         // TODO: 로딩 표시 띄우기
         
+        // 2. 서버 전송
         APIManager.shared.sendVerificationCode(email: cleanEmail) {success in
             DispatchQueue.main.async {
                 if success {
-                    //성공하면 경로에 '코드입력' 단계를 추가 -> 화면이 스와이프 형태로 넘어감
-                    self.navigationPath.append(.codeInput)
+                    self.showError = false // 성공 시 에러 false
+                    self.navigationPath.append(.codeInput) // 성공하면 경로에 '코드입력' 단계를 추가 -> 화면이 스와이프 형태로 넘어감
                 } else {
-                    print("이메일 전송 실패 알림")
+                    self.errorMessage = "잠시 후 다시 시도해주세요"
+                    self.showError = true
                 }
             }
         }
-    } // sendEmail
+    } // sendCode
     
     /**
       * 코드 검증 (성공하면 true 반환)
@@ -46,12 +65,12 @@ class LoginViewModel: ObservableObject {
         APIManager.shared.verifyCode(email: cleanEmail, code: cleanCode) {success in
             DispatchQueue.main.async {
                 if success {
-                    //로그인 성공 -> 건강앱 연동 화면으로 이동
-                    self.navigationPath.append(.healthAuth)
+                    self.showError = false
+                    self.navigationPath.append(.healthAuth) // 로그인 성공 -> 건강앱 연동 화면으로 이동
                 } else {
-                    print("인증번호 불일치 알림")
-                    // 실패하면 입력한 코드 지워주기
-                    self.code = ""
+                    self.errorMessage = "인증코드를 확인해주세요"
+                    self.showError = true
+                    self.code = ""// 실패하면 입력한 코드 지워주기
                 }
             }
         }

@@ -3,7 +3,7 @@
 //  Runner
 //
 //  Created by 윤현기 on 12/7/25.
-//
+// 이메일 입력 플로우 화면
 
 import SwiftUI
 
@@ -18,19 +18,29 @@ struct EmailInputView: View {
             Text("이메일을\n입력해주세요")
                 .font(.system(size: 26, weight: .bold))
                 .padding(.top, 40)
+                .padding(.bottom, 20)
             
             //입력창
-            TextField("example@naver.com", text: $viewModel.email)
+            TextField("example@example.com", text: $viewModel.email)
                 .textFieldStyle(.plain)
                 .font(.system(size: 20))
                 .padding(.vertical, 10)
-                .overlay(Rectangle().frame(height: 1).foregroundColor(.gray.opacity(0.5)), alignment: .bottom)
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .focused($isFocused) // 화면 켜지면 여기에 포커스
-                .onSubmit { // 키보드에서 '완료/Go' 누르면 바로 전송
-                    viewModel.sendCode()
+                .onSubmit { viewModel.sendCode() } // 키보드에서 '완료/Go' 누르면 바로 전송
+                .onChange(of: viewModel.email) { _ in
+                    viewModel.showError = false // 글자 입력 시 에러 메시지 OFF
                 }
+            
+            // 에러 메시지 (조건부 표시)
+            if viewModel.showError {
+                Text(viewModel.errorMessage)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.top, 5)
+                    .transition(.opacity) // 부드럽게 표시
+            }
             
             Spacer()
             
@@ -57,4 +67,3 @@ struct EmailInputView: View {
         }
     }
 }
-

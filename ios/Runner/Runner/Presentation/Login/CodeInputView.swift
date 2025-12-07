@@ -3,7 +3,8 @@
 //  Runner
 //
 //  Created by 윤현기 on 12/7/25.
-// 자동 넘김 기능 .onChange를 써서 6자리가 되는 순간 버튼 누를 필요 없이 서버로 전송
+//  인증코드 플로우 화면단
+//  자동 넘김 기능 .onChange를 써서 6자리가 되는 순간 버튼 누를 필요 없이 서버로 전송
 
 import SwiftUI
 
@@ -22,44 +23,82 @@ struct CodeInputView: View {
                 .font(.subheadline)
                 .foregroundColor(.gray)
             
-            TextField("123456", text: $viewModel.code)
-                .textFieldStyle(.plain)
-                .font(.system(size: 24, weight: .bold)) // 숫자니까 더 크게
-                .keyboardType(.numberPad)
-                .focused($isFocused)
-                // 글자가 바뀔 때 마다 감시하기
-                .onChange(of: viewModel.code) { newValue in
-                    // 6자리가 되면 자동으로 검증 요청
-                    if newValue.count == 6 {
-                        viewModel.verifyCode()
+            // 6칸 입력 박스 ZStack으로 한번 감싸기
+            ZStack {
+                TextField("", text: $viewModel.code)
+                    .keyboardType(.numberPad)
+                    .focused($isFocused)
+                    .accentColor(.clear) //커서 숨기기
+                    .onChange(of: viewModel.code) { newValue in // 글자가 바뀔 때 마다 감시하기
+                        viewModel.showError = false
+                        
+                        // 6자리가 되면 자동으로 검증 요청
+                        if newValue.count == 6 {
+                            viewModel.verifyCode()
+                        }
+                        // 6자리 넘어가면 잘라버림
+                        if newValue.count > 6 {
+                            viewModel.code = String(newValue.prefix(6))
+                        }
                     }
-                    // 6자리 넘어가면 잘라버림
-                    if newValue.count > 6 {
-                        viewModel.code = String(newValue.prefix(6))
+                
+                // 2. 6개 박스 디자인
+                HStack(spacing: 10) {
+                    ForEach(0..<6, id: \.self) { index in
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(getBorderColor(index: index), lineWidth: 2) //테두리 색상 로직
+                            .frame(width: 45, height: 55)
+                            .background(Color.gray.opacity(0.05))
+                            .overlay(
+                                Text(getChar(at: index))
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.black)
+                            )
                     }
-                }
-            
-            Spacer()
-            
-            // 버튼이 있긴 하지만, 자동이라서 누를 일은 거의 없음
-            // (혹시 모를 수동 제출용)
-            if viewModel.code.count == 6 {
-                Button(action: {
-                    viewModel.verifyCode()
-                }) {
-                    Text("확인")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
                 }
             }
+            .padding(.top, 20)
+            
+            // 에러 메세지
+            if viewModel.showError {
+                Text(viewModel.errorMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, alignment: .center) // 가운데 정렬
+            }
+            
+            Spacer()
         }
         .padding(.horizontal, 24)
         .onAppear {
             isFocused = true
         }
     }
-}
-
+    
+    // ====================== 헬퍼 함수들 ======================
+    
+        /**
+          * n번째 글자 가져오기
+        **/
+        private func getChar(at index: Int) -> String {
+            if index < viewModel.code.count {
+                let stringIndex = viewModel.code.index(viewModel.code.startIndex, offsetBy: index)
+                return String(viewModel.code[stringIndex])
+            }
+            return ""
+        }
+    
+        /**
+          * 테두리 색상 결정 (입력 중인 칸은 파란색, 에러나면 빨간색)
+        **/
+        private func getBorderColor(index: Int) -> Color {
+            if viewModel.showError {
+                return .red // 에러나면 전체 빨강
+            }
+            if index == viewModel.code.count {
+                return .blue // 현재 입력해야 할 칸은 파랑
+            }
+            return .gray.opacity(0.3) // 나머지는 회색
+        }
+    }
