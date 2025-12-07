@@ -12,7 +12,7 @@ class APIManager {
     //싱글톤 패턴 (전국에 지점이 하나뿐인 본점)
     static let shared = APIManager()
     
-    //서버 주소 (시뮬레이터에서 맥북 localhost는 localhost로 통함)
+    // 서버 주소 (시뮬레이터에서 맥북 localhost는 localhost로 통함)
     let baseURL = "http://localhost:8080"
     
     // 러닝 기록 업로드 함수
@@ -25,13 +25,6 @@ class APIManager {
         guard let url = URL(string: "\(baseURL)/running/record") else{return}
         
         // 2. 요청(Request) 만들기
-        // var를 쓴 이유는 구조체이기 떄문에 내용 수정을 위해 변수로 선언
-        // request.httpMethod = "POST" ==> 아무것도 안적으면 기본값(GET)임
-        // "application/json"          ==> 이 안에는 일반 텍스트나 이미지X, JSON 형식의 데이터가 있음을 명시
-        // forHTTPHeaderField: "Content-Type" ==> "내용물의 종류" 적는 칸
-        // 내가 만든 스프링 부트 서버 컨트롤러는 " @RequestBody RunningRecordRequest request " 이런 형식임
-        // 스프링은 이 Header를 보고 아 JSON이네 내가 파싱해서 자바 객체로 바꿔야겠어! 라고 판단함
-        // 이걸 적지 않으면 서버는 데이터를 텍스트 덩어리로 인식해서 415에러가 터짐
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -79,5 +72,71 @@ class APIManager {
             
         }.resume()
         
-    }
-}
+    } // uploadRunningRecord
+    
+    /**
+        1. 이메일 인증번호 요청 (POST / auth/ send-code)
+     */
+    func sendVerificationCode(email: String, completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: "/(baseURL)/auth/send-code") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: String] = ["email": email]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("JSON 변환 실패")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                print("전송 실패: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("인증번호 발송 성공")
+                completion(true)
+            } else {
+                print("발송 실패(status code를 확인)")
+                completion(false)
+            }
+        }
+    } // sendVerificationCode
+    
+    /**
+        인증번호 검증 & 로그인
+     */
+    func verifyCode(email: String, code: String, completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: "\(baseURL)/auth/verify") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: String] = ["email": email, "code": code]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {return}
+        
+        URLSession.shared.dataTask(with: request) {data, response, error in
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("인증 완료 로그인 성공")
+                // 나중에는 여기서 서버가 준 JWT토큰을 저장 해야 함!
+                completion(true)
+            } else {
+                print("로그인 실패(인증번호 불일치)")
+                completion(false)
+            }
+        }.resume()
+    } // verifyCode
+    
+            
+} // class
