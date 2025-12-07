@@ -28,14 +28,18 @@ struct CodeInputView: View {
                 TextField("", text: $viewModel.code)
                     .keyboardType(.numberPad)
                     .focused($isFocused)
-                    .accentColor(.clear) //커서 숨기기
+                    .accentColor(.clear) // 커서 숨기기
+                    .foregroundColor(.clear) // 바디 부분의 글자 투명하게 만들어서 숨기기
                     .onChange(of: viewModel.code) { newValue in // 글자가 바뀔 때 마다 감시하기
-                        viewModel.showError = false
-                        
+                        if !newValue.isEmpty {
+                            viewModel.showError = false
+                        }
+                    
                         // 6자리가 되면 자동으로 검증 요청
                         if newValue.count == 6 {
                             viewModel.verifyCode()
                         }
+                        
                         // 6자리 넘어가면 잘라버림
                         if newValue.count > 6 {
                             viewModel.code = String(newValue.prefix(6))
@@ -53,7 +57,7 @@ struct CodeInputView: View {
                                 Text(getChar(at: index))
                                     .font(.title)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.black)
+                                    .foregroundColor(.black)
                             )
                     }
                 }
