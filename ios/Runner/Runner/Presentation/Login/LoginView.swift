@@ -38,11 +38,8 @@ struct LoginView: View {
                 // 2. 인증번호 발송 버튼
                 if !isCodeSent {
                     Button(action: {
-                        // 공백 제거 + 소문자 변환
-                        let cleanEmail = email.trimmingCharacters(in: .whitespaces).lowercased()
-                        
                         // 서버로 이메일 전송 요청
-                        APIManager.shared.sendVerificationCode(email: cleanEmail) { success in
+                        APIManager.shared.sendVerificationCode(email: email.sanitizedEmail) { success in
                             
                             // UI 변경은 반드시 메인 스레드에서 해야 함
                             DispatchQueue.main.async {
@@ -72,12 +69,9 @@ struct LoginView: View {
                             .padding(.horizontal)
                         
                         Button(action:  {
-                            // 공백 제거 + 소문자 변환
-                            let cleanEmail = email.trimmingCharacters(in: .whitespaces).lowercased()
-                            let cleanCode = code.trimmingCharacters(in: .whitespaces)
                             
                             // 서버로 인증번호 검증 요청
-                            APIManager.shared.verifyCode(email: cleanEmail, code: cleanCode) { success in
+                            APIManager.shared.verifyCode(email: email.sanitizedEmail, code: code.sanitizedCode) { success in
                                 if success {
                                     // 전역 관리자에게 알려주기 (ContentView가 이걸 보고 화면을 바꿈)
                                     UserManager.shared.currentUserId = 1

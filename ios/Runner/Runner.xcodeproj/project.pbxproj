@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		AEE915BE2EDAAE4900FFCC8D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AEE915BE2EDAAE4900FFCC8D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Runner.app; path = "/Users/yun/runner/ios/Runner/build/Debug-iphoneos/Runner.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AEE915CE2EDAB1B200FFCC8D /* Exceptions for "Runner" folder in "Runner" target */ = {
+		AE20CD9A2EE52FF5008893EB /* Exceptions for "Runner" folder in "Runner" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Resources/Info.plist,
@@ -21,10 +21,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AEE915C02EDAAE4900FFCC8D /* Runner */ = {
+		AE20CD902EE52FF5008893EB /* Runner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				AEE915CE2EDAB1B200FFCC8D /* Exceptions for "Runner" folder in "Runner" target */,
+				AE20CD9A2EE52FF5008893EB /* Exceptions for "Runner" folder in "Runner" target */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -45,17 +45,8 @@
 		AEE915B52EDAAE4900FFCC8D = {
 			isa = PBXGroup;
 			children = (
-				AEE915C02EDAAE4900FFCC8D /* Runner */,
-				AEE915BF2EDAAE4900FFCC8D /* Products */,
+				AE20CD902EE52FF5008893EB /* Runner */,
 			);
-			sourceTree = "<group>";
-		};
-		AEE915BF2EDAAE4900FFCC8D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				AEE915BE2EDAAE4900FFCC8D /* Runner.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -74,7 +65,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AEE915C02EDAAE4900FFCC8D /* Runner */,
+				AE20CD902EE52FF5008893EB /* Runner */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -108,7 +99,7 @@
 			mainGroup = AEE915B52EDAAE4900FFCC8D;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = AEE915BF2EDAAE4900FFCC8D /* Products */;
+			productRefGroup = AEE915B52EDAAE4900FFCC8D;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (

@@ -1,7 +1,7 @@
 package com.runmatch.api.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import com.runmatch.api.global.util.StringUtil;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,7 +21,7 @@ public class AuthService {
      */
     public void sendVerficationCode(String email) {
         //공백제거 & 소문자 변환
-        String safeEmail = email.trim().toLowerCase();
+        String safeEmail = StringUtil.sanitizeEmail(email);
         // 인증번호 생성 (100000 ~ 999999)
         String code = createCode();
 
@@ -40,8 +40,8 @@ public class AuthService {
      */
     public boolean verfiyCode(String email, String inputCode) {
         // 공백제거 & 소문자 변환
-        String safeEmail = email.trim().toLowerCase();
-        String safeCode = inputCode.trim();
+        String safeEmail = StringUtil.sanitizeEmail(email);
+        String safeCode = StringUtil.sanitizeCode(inputCode);
 
         String redisKey = "AUTH:" + safeEmail;
         String savedCode = redisTemplate.opsForValue().get(redisKey);
@@ -50,7 +50,7 @@ public class AuthService {
         System.out.println("🔎 [Redis 조회] 키: " + redisKey + " -> 값: " + savedCode);
 
         // 코드가 존재하고 입력값과 일치하면 통과
-        if (savedCode != null && savedCode.equals(inputCode)) {
+        if (savedCode != null && savedCode.equals(safeCode)) {
             redisTemplate.delete("AUTH:" + email);
             return true;
         }

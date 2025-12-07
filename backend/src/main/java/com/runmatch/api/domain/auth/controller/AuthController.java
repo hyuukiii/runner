@@ -1,4 +1,4 @@
-package com.runmatch.api.domain.auth.service.controller;
+package com.runmatch.api.domain.auth.controller;
 
 
 import com.runmatch.api.domain.auth.service.AuthService;
