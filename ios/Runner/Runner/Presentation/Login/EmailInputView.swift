@@ -28,6 +28,8 @@ struct EmailInputView: View {
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .focused($isFocused) // 화면 켜지면 여기에 포커스
+                .modifier(ShakeEffect(animatableData: CGFloat(viewModel.shakeTrigger)))
+                .animation(.default, value: viewModel.shakeTrigger)
                 .onSubmit { viewModel.sendCode() } // 키보드에서 '완료/Go' 누르면 바로 전송
                 .onChange(of: viewModel.email) { _ in
                     viewModel.showError = false // 글자 입력 시 에러 메시지 OFF

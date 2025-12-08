@@ -61,6 +61,8 @@ struct CodeInputView: View {
                             )
                     }
                 }
+                .modifier(ShakeEffect(animatableData: CGFloat(viewModel.shakeTrigger)))
+                .animation(.default, value: viewModel.shakeTrigger)
             }
             .padding(.top, 20)
             

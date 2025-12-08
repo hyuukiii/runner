@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		AEE915BE2EDAAE4900FFCC8D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Runner.app; path = "/Users/yun/runner/ios/Runner/build/Debug-iphoneos/Runner.app"; sourceTree = "<absolute>"; };
+		AE9A09582EE6E8450076D944 /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -46,6 +46,7 @@
 			isa = PBXGroup;
 			children = (
 				AE20CD902EE52FF5008893EB /* Runner */,
+				AE9A09582EE6E8450076D944 /* Runner.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -71,7 +72,7 @@
 			packageProductDependencies = (
 			);
 			productName = Runner;
-			productReference = AEE915BE2EDAAE4900FFCC8D /* Runner.app */;
+			productReference = AE9A09582EE6E8450076D944 /* Runner.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

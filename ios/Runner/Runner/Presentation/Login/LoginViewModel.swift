@@ -18,6 +18,10 @@ class LoginViewModel: ObservableObject {
     @Published var errorMessage: String = "" // 에러 메시지 저장용 변수
     @Published var showError: Bool = false  // 에러 메시지 보여줄지 말지 결정
     
+    @Published var shakeTrigger: Int = 0
+    
+    @Published var isLoading: Bool = false //로딩 상태 변수
+    
     /**
       * 이메일 형식 검사 하는 정규식 함수
      */
@@ -36,20 +40,34 @@ class LoginViewModel: ObservableObject {
         if !isValidEmail(cleanEmail) {
             errorMessage = "이메일을 다시 확인해주세요"
             showError = true
+            shakeTrigger += 1 // 좌우로 흔듦
             return
         }
         
-        // TODO: 로딩 표시 띄우기
-        
+        // 로딩화면으로 전환
+        // withAnimation : 화면이 부드럽게 페이드인/아웃 됨
+        withAnimation {
+            isLoading = true
+            showError = false
+        }
+            
         // 2. 서버 전송
         APIManager.shared.sendVerificationCode(email: cleanEmail) {success in
             DispatchQueue.main.async {
+                // 로딩 종료 (약간의 딜레이를 줘서 빨리 깜빡이는것을 방지함) 만약 서버가 너무 빠르면 0.5초정도 보여기
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation {
+                        self.isLoading = false
+                    }
+                }
+                
                 if success {
                     self.showError = false // 성공 시 에러 false
                     self.navigationPath.append(.codeInput) // 성공하면 경로에 '코드입력' 단계를 추가 -> 화면이 스와이프 형태로 넘어감
                 } else {
                     self.errorMessage = "잠시 후 다시 시도해주세요"
                     self.showError = true
+                    self.shakeTrigger += 1
                 }
             }
         }
@@ -71,6 +89,7 @@ class LoginViewModel: ObservableObject {
                     self.errorMessage = "인증코드를 확인해주세요"
                     self.showError = true
                     self.code = ""// 실패하면 입력한 코드 지워주기
+                    self.shakeTrigger += 1
                 }
             }
         }
