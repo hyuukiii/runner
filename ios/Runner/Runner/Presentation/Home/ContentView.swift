@@ -13,10 +13,10 @@ struct ContentView: View {
     var body: some View {
         //분기 처리
         if userManager.isLoggedIn {
-            // 1. 로그인이 되어 있다면 -> 헬스킷 연동 화면으로
-            HealthAuthView()
+            // 1. 로그인이 되어 있다면 -> 매칭화면으로
+            MatchingView()
         } else {
-            // 2. 로그인이 안 되어 있다면 -> 로그인 화면으로
+            // 2. 로그인이 안 되어 있다면 -> '로그인 플로우'로
             LoginFlowView()
         }
     }

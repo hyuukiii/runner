@@ -26,8 +26,11 @@ struct LoginFlowView: View {
                         case .codeInput:
                             CodeInputView(viewModel: viewModel)
                         case .healthAuth:
-                            HealthAuthView()
+                            HealthAuthView(viewModel: viewModel) // viewModel 넘겨주기
                                 .navigationBarBackButtonHidden(true)// 건강앱 연동 플로우에서는 뒤로가기 블락
+                        case .locationSetting:
+                            LocationSettingView(viewModel: viewModel)
+                                .navigationBarBackButtonHidden(true)
                         }
                     } // navigationDestination
                 

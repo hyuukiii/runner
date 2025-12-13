@@ -10,4 +10,5 @@ enum LoginStep {
     case email
     case codeInput
     case healthAuth
+    case locationSetting
 }

@@ -13,6 +13,8 @@ struct HealthAuthView: View {
     // @StateObject :화면이 아무리 다시 그려져도, 헬스킷 매니저는 메모리에서 지우지 말고 유지 한다.
     @StateObject var hkManager = HealthKitManager()
     
+    @ObservedObject var viewModel: LoginViewModel
+    
     var body: some View {
         VStack(spacing: 20) {
             //로고 이미지
@@ -34,11 +36,9 @@ struct HealthAuthView: View {
             Button(action: {
                 hkManager.requestAuthorization()
                 
-                // 약간의 딜레이 후 메인화면으로 전환
-                // TODO: hkManager 안에서 성공 콜백을 받도록 개선 하기, 현재는 간단하게 버튼 누르면 1초 뒤에 넘어가게 구현
+                // 약간의 딜레이 후 지도플로우로 전환
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    // 모든 절차 완료 메인으로 이동
-                    UserManager.shared.currentUserId = 1
+                    viewModel.navigationPath.append(.locationSetting)
                 }
                 
             }) {
@@ -56,6 +56,3 @@ struct HealthAuthView: View {
     }
 }
 
-#Preview {
-    HealthAuthView()
-}
