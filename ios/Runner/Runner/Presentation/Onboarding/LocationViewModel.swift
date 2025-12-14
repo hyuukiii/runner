@@ -24,8 +24,9 @@ class LocationViewModel: ObservableObject {
     
     // UI 전역변수
     @Published var addressText: String = ""     // 인풋박스에 들어갈 주소
+    @Published var dongName: String = ""        // UI 표시용 (예: 00동)
     @Published var isMapMoving: Bool = false    // 지도가 움직이는 중인지 체크
-    
+
     // 내부 도구들
     private let geocoder = CLGeocoder()
     private var searchTask: Task<Void, Never>? // 디바운스 처리를 위한 테스크
@@ -56,16 +57,48 @@ class LocationViewModel: ObservableObject {
         searchTask = Task {
             try? await Task.sleep(nanoseconds: 800_000_000) // 디바운스
             
+            // 3. 취소 되었는지 확인 (지도가 또 움직인다면 여기서 멈춤)
+            if Task.isCancelled { return }
+                        
             let location = CLLocation(latitude: region.center.latitude, longitude: region.center.longitude)
             
-            try? await geocoder.reverseGeocodeLocation(location).first.map{ placemark in
-                let city = placemark.administrativeArea ?? ""
-                let district = placemark.locality ?? ""
-                let dong = placemark.subLocality ?? placemark.thoroughfare ?? ""
+            // 4. 주소 변환 시작
+            do {
+                guard let placemark = try await geocoder.reverseGeocodeLocation(location).first else { return }
                 
+                // 취소 확인 (네트워크 통신 중에 지도가 움직였을 수도 있음)
+                if Task.isCancelled { return }
+                
+                // 주소 조합 로직
+                let adminArea = placemark.administrativeArea ?? "" // 서울특별시
+                let locality = placemark.locality ?? "" // 서울특별시 (가끔 중복 됨) or 성남시
+                let subLocality = placemark.subLocality ?? "" // 강남구 or 분당구
+                let thoroughfare = placemark.thoroughfare ?? "" // 역삼동 or 판교로
+                
+                // 중복 제거 및 깔끔하게 합치기
+                var addressParts: [String] = []
+                
+                // 한국식 주소를 정제하기
+                if !adminArea.isEmpty { addressParts.append(adminArea) }
+                if !locality.isEmpty && locality != adminArea { addressParts.append(locality) }
+                if !subLocality.isEmpty { addressParts.append(subLocality) }
+                if subLocality.isEmpty && !thoroughfare.isEmpty { addressParts.append(thoroughfare) }
+                
+                let newAddress = addressParts.joined(separator: " ")
+                
+                // 동네 이름만 추출 (UI용) ( 동 -> 없으면 면/리 -> 없으면 도로명 )
+                let simpleName = !subLocality.isEmpty ? subLocality : (placemark.thoroughfare ?? locality)
+                
+                // UI 업데이트
                 DispatchQueue.main.async {
-                    self.addressText = "\(city) \(district) \(dong)".trimmingCharacters(in: .whitespaces)
+                    self.addressText = newAddress
+                    self.dongName = simpleName
+                    print("📍 주소 업데이트 완료: \(newAddress)")
                 }
+                
+            } catch {
+                // 에러 발생 시 (너무 많이 요청했거나 네트워크 문제)
+                print("⚠️ 주소 변환 실패: \(error.localizedDescription)")
             }
         }
     } // updateAddressFromMap

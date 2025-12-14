@@ -7,108 +7,132 @@
 
 import SwiftUI
 import MapKit
-import CoreLocation
 
 struct LocationSettingView: View {
-    // 네비게이션용
     @ObservedObject var viewModel: LoginViewModel
-    
-    // 뷰모델 호출
     @StateObject private var locationVM = LocationViewModel()
     
-    // 상단 안내 메시지 표시 여부
-    @State private var showToast: Bool = false
-    
     var body: some View {
-        ZStack {
-            // 1. 지도( 전체 화면 )
+        ZStack(alignment: .bottom) {
+            
+            // 1. 지도 (배경)
             Map(coordinateRegion: $locationVM.region, interactionModes: .all, showsUserLocation: true)
                 .ignoresSafeArea()
-            // 지도가 멈추면(값이 바뀌면) -> 주소 가져오기 (Reverse Geocoding)
                 .onChange(of: locationVM.region.center.latitude) { _ in
-                    // 수동으로 주소를 치고있는게 아닐때만 지도를 따라감
-                    if !locationVM.isMapMoving {
-                        locationVM.updateAddressFromMap()
-                    }
+                    locationVM.updateAddressFromMap()
                 }
             
-            // 2. 중앙 핀 (항상 가운데 고정)
-            Image(systemName: "mappin")
-                .font(.system(size: 40))
-                .foregroundColor(.red)
-                .shadow(radius: 5)
-                .offset(y: -20) // 핀 끝을 중앙에 맞춤
-        
-        // 3. UI (상단 토스트 + 하단 입력창)
-        VStack {
-            // [상단] 튜토리얼 토스트 메시지
-            if showToast {
-                Text("매칭을 위해 살고 계신 지역이 필요해요")
-                    .font(.subheadline)
-                    .foregroundColor(.white)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 20)
-                    .background(Color.black.opacity(0.8))
-                    .cornerRadius(25)
-                    .padding(.top, 10)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            } // showToast
-            
-            Spacer()
-            
-            // [하단] 주소 입력 및 완료 카드
-            VStack(spacing: 15) {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    
-                    // 주소 입력창 (수정 가능)
-                    TextField("지도를 움직이거나 주소를 입력하세요", text: $locationVM.addressText)
-                    // 엔터 누르면 -> 지도를 해당 주소로 이동
-                        .onSubmit { locationVM.updateMapFromAddress() }
-                        .submitLabel(.search)
-                }
-                .padding()
-                .background(Color(uiColor: .systemGray6))
-                .cornerRadius(10)
+            // 하단 정보 시트
+            VStack(spacing: 0) { // Spacing을 0으로 하고 Spacer()로 조절
                 
-                // 완료 버튼
-                Button(action: {
-                    completeSetting()
-                }) {
-                    Text("이 위치로 설정")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
+                // 상단 영역 : 안내 멘트 & 핵심 위치 정보
+                VStack(spacing: 10) {
+                    Text(" 매칭을 위해 사는 지역이 필요해요 ")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.top, 20) // 시트 위쪽 여백
+                    
+                    // 위치 표시 텍스트
+                    HStack(spacing: 0) {
+                        Text("현재 계신 곳은 ")
+                            .font(.title3)
+                            .foregroundColor(.black)
+                        
+                        // 로딩 중 애니메이션 or 동네 이름
+                        if locationVM.dongName.isEmpty {
+                            BlinkingDots()
+                        } else {
+                            Text("'\(locationVM.dongName)'")
+                                .font(.title2) // 가장 크게
+                                .fontWeight(.heavy) // 두께도 가장 두껍게
+                                .foregroundColor(.blue)
+                        }
+                        
+                        Text(" 이시군요!")
+                            .font(.title3)
+                            .foregroundColor(.black)
+                    }
+                    .padding(.top, 5) // 위 멘트랑 살짝 띄우기
+                }
+                
+                // 중앙 공백: 위 내용은 위로, 아래 내용은 아래로 쫙 밀어버림
+                Spacer()
+                
+                // (3) 하단 영역: 버튼 & 변경 안내
+                VStack(spacing: 15) {
+                    // 완료 버튼
+                    Button(action: {
+                        if !locationVM.dongName.isEmpty {
+                            completeSetting()
+                        }
+                    }) {
+                        Text("시작하기")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16) // 버튼 높이감 있게
+                            .background(locationVM.dongName.isEmpty ? Color.gray : Color.blue)
+                            .cornerRadius(14)
+                    }
+                    .disabled(locationVM.dongName.isEmpty)
+                    
+                    // 변경 안내 (맨 아래 배치)
+                    Text("마이페이지에서 언제든지 변경할 수 있어요")
+                        .font(.caption2)
+                        .foregroundColor(Color.gray.opacity(0.7))
+                        .padding(.bottom, 10) // 바닥에서 살짝 띄우기
+                }
+                .padding(.horizontal, 20) // 좌우 여백
+                .padding(.bottom, 20)     // 시트 끝부분 여백
+            }
+            .frame(height: 180) // 시트 높이를 고정하기 안정감 주기
+            .background(
+                Color.white
+                    .cornerRadius(30, corners: [.topLeft, .topRight])
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -5)
+                    .ignoresSafeArea(edges: .bottom) // 흰 배경은 끝까지 내리기
+            )
+        }
+    }
+    
+    private func completeSetting() {
+        print("최종 선택: \(locationVM.dongName)")
+        UserManager.shared.currentUserId = 1
+        viewModel.navigationPath = []
+    }
+}
+
+// ✨ " . . . " 깜빡이는 애니메이션 뷰
+struct BlinkingDots: View {
+    @State private var isActive = false
+    
+    var body: some View {
+        Text(" . . . ")
+            .font(.title2)
+            .fontWeight(.heavy)
+            .foregroundColor(.gray)
+            .opacity(isActive ? 0.3 : 1.0)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.8).repeatForever()) {
+                    isActive = true
                 }
             }
-            .padding(20)
-            .background(Color.white)
-            .cornerRadius(20)
-            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -5)
-            .padding(.bottom, 20) // 홈bar를 고려하여 하단 여백 주기
-        } // VStack
-    } // ZStack
-    .onAppear {
-        // 화면 켜지면 토스트 띄우기
-        withAnimation{ showToast = true}
-            
-        // 3초 뒤에 토스트 없애기
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-        withAnimation{ showToast = false}
-       }
-     } // onAppear
-  }
-
-  private func completeSetting() {
-      print("최종주소 \(locationVM.addressText)")
-      // TODO: 서버 전송
-      UserManager.shared.currentUserId = 1
-      viewModel.navigationPath = []
-  }
+    }
 }
-    
+
+// 둥근 모서리 확장
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape(RoundedCorner(radius: radius, corners: corners))
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
+}
     
