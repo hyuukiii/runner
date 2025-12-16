@@ -83,9 +83,9 @@ struct LocationSettingView: View {
                         .padding(.bottom, 10) // 바닥에서 살짝 띄우기
                 }
                 .padding(.horizontal, 20) // 좌우 여백
-                .padding(.bottom, 20)     // 시트 끝부분 여백
+                .padding(.bottom, 5)     // 시트 끝부분 여백
             }
-            .frame(height: 180) // 시트 높이를 고정하기 안정감 주기
+            .frame(height: 200) // 시트 높이를 고정하기 안정감 주기
             .background(
                 Color.white
                     .cornerRadius(30, corners: [.topLeft, .topRight])
@@ -134,5 +134,10 @@ struct RoundedCorner: Shape {
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
         return Path(path.cgPath)
     }
+}
+
+#Preview {
+    // 여기에 더미 데이터를 넣어서 미리보기를 만듭니다.
+    LocationSettingView(viewModel: LoginViewModel())
 }
     
