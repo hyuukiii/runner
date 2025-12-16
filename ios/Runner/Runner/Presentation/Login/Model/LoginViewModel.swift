@@ -8,19 +8,20 @@ import SwiftUI
 import Combine
 
 class LoginViewModel: ObservableObject {
-    // 입력 데이터
+    // 입력 받은( 받아야할 ) 데이터
     @Published var email: String = ""
     @Published var code: String = ""
+    @Published var region: String = ""
+    @Published var gender: String = ""
+    @Published var birthYear: Int = 0
     
     @Published var navigationPath: [LoginStep] = [] // 화면 이동 경로 (이 배열에 값을 넣으면 화면이 바뀜)
     
-    
+    // 부가적 기능
     @Published var errorMessage: String = "" // 에러 메시지 저장용 변수
     @Published var showError: Bool = false  // 에러 메시지 보여줄지 말지 결정
-    
     @Published var shakeTrigger: Int = 0
-    
-    @Published var isLoading: Bool = false //로딩 상태 변수
+    @Published var isLoading: Bool = false // 로딩 상태 변수
     
     /**
       * 이메일 형식 검사 하는 정규식 함수

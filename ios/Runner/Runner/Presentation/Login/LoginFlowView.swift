@@ -31,6 +31,8 @@ struct LoginFlowView: View {
                         case .locationSetting:
                             LocationSettingView(viewModel: viewModel)
                                 .navigationBarBackButtonHidden(true)
+                        case .nickname:
+                            NicknameSettingView(viewModel: viewModel)
                         }
                     } // navigationDestination
                 
