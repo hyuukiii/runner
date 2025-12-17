@@ -18,6 +18,11 @@ struct NicknameSettingView: View {
     @State private var nickname: String = ""
     @FocusState private var isFocused: Bool
     
+    // 진동 타이밍 잡기용 변수(이전 상태를 기억하기 위함)
+    @State private var isLastValid: Bool = false
+    // 화면 흔들림 변수
+    @State private var shakeTrigger: CGFloat = 0
+    
     // 유효성 검사 ( 2~10자, 공백 없음 )
     private var isValid: Bool {
         return nickname.count >= 2 && nickname.count <= 10 && !nickname.contains(" ")
@@ -32,7 +37,7 @@ struct NicknameSettingView: View {
                     .font(.system(size: 26, weight: .bold))
                     .lineSpacing(4) // 줄 간격 살짝 띄우기
                 
-                Text("러닝 메이트들에게 보여질 이름 이에요")
+                Text("러너들에게 보여질 이름 이에요")
                     .font(.body)
                     .foregroundColor(.gray)
                 
@@ -42,7 +47,7 @@ struct NicknameSettingView: View {
             // 2. 닉네임 입력창 (박스 스타일)
             VStack(alignment: .leading,spacing: 8) {
                 
-                // HStack 전체에 테두리를 씌우자
+                // '닉네임 입력' 박스를 프레임으로 씌우자
                 HStack {
                     TextField("닉네임 입력", text: $nickname)
                         .font(.title3) // 박스 안의 글자는 조금 줄여서 균형 맞추기
@@ -53,10 +58,35 @@ struct NicknameSettingView: View {
                             let filtered = newValue.replacingOccurrences(of: " ", with: "")
                             if filtered.count > 10 {
                                 nickname = String(nickname.prefix(10))
+                                // 글자수 꽉 차면 가벼운 진동
+                                HapticManager.instance.impact(style: .rigid)
                             } else {
                                 nickname = filtered
                             }
+                            
+                            // 진동 상태가 변하는 순간을 저장하는 변수
+                            let currentStatus = (nickname.count >= 2 && nickname.count <= 10)
+                            
+                            // 상태가 달라졌을 때만 진동 (무한 진동 방지)
+                            if currentStatus != isLastValid {
+                                if currentStatus {
+                                    // 성공(Valid)
+                                    HapticManager.instance.notification(type: .success)
+                                }
+                                // 현재 진동 상태 저장
+                                isLastValid = currentStatus
+                            }
                         }
+                    // 실패(Error) -> 2글자 미만이 되었을 떄
+                        .onChange(of: isFocused) { focused in
+                            // 입력중 X + 유효 X + 비어있지않음
+                            if !focused && !isValid && !nickname.isEmpty {
+                                HapticManager.instance.notification(type: .error)
+                                withAnimation(.default) {
+                                    shakeTrigger += 1
+                                }
+                            }
+                        } // onChange
                     
                 /**
                      * 상태에 따라 아이콘 바꾸기
@@ -72,8 +102,8 @@ struct NicknameSettingView: View {
                                 .foregroundColor(.gray)
                                 .font(.title3)
                         }
-                    } else if !nickname.isEmpty {
-                        // 입력 끝나고 키보드 내려갔을 때 성공 표시
+                    } else if isValid {
+                        // 입력 끝나고 유효해야 키보드 내려갔을 때 성공 표시
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
                             .font(.title3)
@@ -86,13 +116,17 @@ struct NicknameSettingView: View {
                         // 테두리 색상 로직 : 가능(초록) -> 포커스(파랑) -> 평소(회색)
                         .stroke(isFocused ? Color.blue : (isValid ? Color.green : Color.gray.opacity(0.3)), lineWidth: 1.5)
                 )
+                // 뷰에 ShakeEffect 추가
+                // animatableData 값이 변할 떄 마다 흔들림.
+                .modifier(ShakeEffect(animatableData: shakeTrigger))
+                
                 // 에니메이션 부드럽게 적용
                 .animation(.easeInOut(duration: 0.2), value : isValid)
                 .animation(.easeInOut(duration: 0.2), value : isFocused)
             
                 // 하단 헬퍼 텍스트 ( 에러 메시지 or 글자수 카운트 )
                 HStack {
-                    if !nickname.isEmpty && !isValid {
+                    if !isFocused && !nickname.isEmpty && !isValid {
                         // 글자가 있는데 조건이 안 맞을 떄만 에러 메시지 표시
                         Text("2글자 이상 가능해요")
                             .font(.caption)
@@ -120,6 +154,7 @@ struct NicknameSettingView: View {
                 
                 // 이 컨테이너 안의 내용이 변할 때 부드럽게 처리하기
                 .animation(.easeInOut(duration: 0.3), value: isValid)
+                .animation(.easeInOut(duration: 0.3), value: isFocused) // 포커스 상태 변화 에니메이션 추가
                 .animation(.easeInOut(duration: 0.3), value: nickname.isEmpty)
             }
             .padding(.top, 30)
