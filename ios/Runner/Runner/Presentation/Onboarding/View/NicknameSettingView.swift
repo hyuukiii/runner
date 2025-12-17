@@ -6,6 +6,7 @@
 // TODO: 다음 버튼에 1 / 3 기능 넣기 , 닉네임 입력칸 허전해서 UI/UX 적으로 개선하기 , 유효성 검사 로직은 실행 될 때만 보여주기
 
 import SwiftUI
+import PhotosUI
 
 struct NicknameSettingView: View {
     // 이전 화면(LoginFlow)에서 주입받을 뷰모델
@@ -17,6 +18,9 @@ struct NicknameSettingView: View {
     // 닉네임 입력 상태 관리
     @State private var nickname: String = ""
     @FocusState private var isFocused: Bool
+    
+    // 갤러리 연동 변수
+    @State private var selectedItem: PhotosPickerItem? = nil
     
     // 진동 타이밍 잡기용 변수(이전 상태를 기억하기 위함)
     @State private var isLastValid: Bool = false
@@ -43,6 +47,72 @@ struct NicknameSettingView: View {
                 
             } // 안내 문구 VStack
             .padding(.top, 40)
+            
+            // 프로필 사진 선택 영역 ( 가운데 정렬 )
+            HStack {
+                Spacer() // 좌우 Spacer로 가운데 정렬
+                
+                PhotosPicker(selection: $selectedItem, matching: .images) {
+                    ZStack {
+                        // 1. 프로필 이미지 ( 없으면 기본 아이콘 )
+                        if let image = viewModel.profileImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                        } else {
+                            // 선택된 사진이 없을 때 (기본 회색 원 + 사람 아이콘)
+                            Circle()
+                                .fill(Color.gray.opacity(0.1))
+                                .frame(width: 100, height: 100)
+                                .overlay(
+                                    Image(systemName: "person.fill")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.gray.opacity(0.5))
+                                )
+                        }
+                        
+                        // 카메라 배지(우측 하단)
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.white)
+                                    .padding(6)
+                                    .background(Color.blue)
+                                    .clipShape(Circle())
+                                    .overlay (
+                                        Circle()
+                                            .stroke(Color.white, lineWidth: 2) // 흰색 테두리로 분리감 주기
+                                    )
+                            }
+                        }
+                    }
+                    .frame(width: 100, height: 100) // 전체 터치 영역
+                } // PhotosPicker
+                
+                // 사진 선택 시 데이터 변환 로직
+                .onChange(of: selectedItem) { newItem in
+                    Task {
+                        // 선택한 아이템을 데이터로 로드 -> UIImag로 변환
+                        if let data = try? await newItem?.loadTransferable(type: Data.self),
+                               let uiImage = UIImage(data: data) {
+                                // 뷰모델에 저장 ( 메인 스레드에서 UI 업데이트 )
+                            await MainActor.run {
+                                viewModel.profileImage = uiImage
+                                HapticManager.instance.impact(style: .light) // 엄청 가벼운 진동
+                            }
+                        }
+                    }
+                }
+                
+                Spacer() // 좌우 Spacer로 가운데 정렬
+            }
+            .padding(.top, 20)
+            .padding(.bottom, 10)
             
             // 2. 닉네임 입력창 (박스 스타일)
             VStack(alignment: .leading,spacing: 8) {

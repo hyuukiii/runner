@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Combine
+import UIKit // UIImage 사용을 위해 추가
 
 class LoginViewModel: ObservableObject {
     // 입력 받은( 받아야할 ) 데이터
@@ -15,6 +16,9 @@ class LoginViewModel: ObservableObject {
     @Published var nickname: String = ""
     @Published var gender: String = ""
     @Published var birthYear: Int = 0
+    
+    // 프로필 이미지 저장 변수
+    @Published var profileImage: UIImage? = nil
     
     @Published var navigationPath: [LoginStep] = [] // 화면 이동 경로 (이 배열에 값을 넣으면 화면이 바뀜)
     
