@@ -12,6 +12,7 @@ class LoginViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var code: String = ""
     @Published var region: String = ""
+    @Published var nickname: String = ""
     @Published var gender: String = ""
     @Published var birthYear: Int = 0
     

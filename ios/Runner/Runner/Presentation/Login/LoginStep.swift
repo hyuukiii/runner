@@ -12,4 +12,5 @@ enum LoginStep {
     case healthAuth
     case locationSetting
     case nickname
+    case genderInfo
 }

@@ -33,6 +33,9 @@ struct LoginFlowView: View {
                                 .navigationBarBackButtonHidden(true)
                         case .nickname:
                             NicknameSettingView(viewModel: viewModel)
+                        
+                        case .genderInfo:
+                            Text("성별/나이 입력화면 예정")
                         }
                     } // navigationDestination
                 
