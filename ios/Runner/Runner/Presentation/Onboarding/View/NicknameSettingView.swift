@@ -6,309 +6,272 @@
 // TODO: 다음 버튼에 1 / 3 기능 넣기 , 닉네임 입력칸 허전해서 UI/UX 적으로 개선하기 , 유효성 검사 로직은 실행 될 때만 보여주기
 
 import SwiftUI
+import PhotosUI // 앨범 접근용
+
+import SwiftUI
 import PhotosUI
 
 struct NicknameSettingView: View {
-    // 이전 화면(LoginFlow)에서 주입받을 뷰모델
     @ObservedObject var viewModel: LoginViewModel
-    
-    // 뒤로가기 동작을 위해 환경변수 추가 (UI에서는 보이지 않음)
     @Environment(\.dismiss) private var dismiss
     
-    // 닉네임 입력 상태 관리
+    // 상태 변수
     @State private var nickname: String = ""
     @FocusState private var isFocused: Bool
-    
-    // 갤러리 연동 변수
+    @State private var isLastValid: Bool = false
+    @State private var shakeTrigger: CGFloat = 0
     @State private var selectedItem: PhotosPickerItem? = nil
     
-    // 진동 타이밍 잡기용 변수(이전 상태를 기억하기 위함)
-    @State private var isLastValid: Bool = false
-    // 화면 흔들림 변수
-    @State private var shakeTrigger: CGFloat = 0
-    
-    // 유효성 검사 ( 2~10자, 공백 없음 )
     private var isValid: Bool {
         return nickname.count >= 2 && nickname.count <= 10 && !nickname.contains(" ")
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(spacing: 0) {
             
-            // 1. 상단 안내 문구
-            VStack(alignment: .leading, spacing: 10) {
-                Text("어떤 닉네임으로\n불러드릴까요?")
-                    .font(.system(size: 26, weight: .bold))
-                    .lineSpacing(4) // 줄 간격 살짝 띄우기
-                
-                Text("러너들에게 보여질 이름 이에요")
-                    .font(.body)
-                    .foregroundColor(.gray)
-                
-            } // 안내 문구 VStack
-            .padding(.top, 40)
+            // 1. 상단 네비게이션
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(.black)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 10)
             
-            // 프로필 사진 선택 영역
-            VStack(spacing: 12) { // 사진과 아래 테스트 간격
-                HStack {
-                    Spacer()
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 40) { // 간격 시원하게 조정
                     
-                    PhotosPicker(selection: $selectedItem, matching: .images) {
-                        ZStack {
-                            // 프로필 이미지 ( 없으면 기본 아이콘 )
-                            if let image = viewModel.profileImage {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 160, height: 160)
-                                    .clipShape(Circle())
-                                    .overlay(
-                                        Circle().stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                                    )
-                            } else {
-                                // 선택된 사진이 없을 때 (점선 플레이스 홀더)
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.gray.opacity(0.05)) // 아주 연한 회색 배경
-                                    
-                                    // 점선 테두리
-                                    Circle()
-                                        .strokeBorder(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [6,6]))
-                                    
-                                    // 중앙의 큰 플러스 버튼
-                                    Image(systemName: "plus")
-                                        .font(.system(size: 40, weight: .light))
-                                        .foregroundColor(.blue.opacity(0.6)) // 브랜드 컬러
-                                }
-                                .frame(width: 160, height: 160)
-                            }
-                            
-                            // 카메라 배지(우측 하단)
-                            VStack {
-                                Spacer()
-                                HStack {
-                                    Spacer()
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundStyle(.white)
-                                        .padding(8)
-                                        .background(Color.blue)
-                                        .clipShape(Circle())
-                                        .overlay (
-                                            Circle().stroke(Color.white, lineWidth: 2) // 흰색 테두리로 분리감 주기
-                                        )
-                                        .shadow(color: Color.black.opacity(0.2), radius: 3, x: 1, y: 2)
-                                }
-                            }
-                            .frame(width: 150, height: 150)
-                        }
-                    } // PhotosPicker
+                    // 2. 타이틀
+                    VStack(spacing: 8) {
+                        Text("나만의 러너 카드를 만들어보세요 ")
+                            .font(.system(size: 24, weight: .bold))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(5)
+                        
+                        Text("사진과 닉네임을 눌러 수정할 수 있어요")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.top, 45)
                     
-                    // 사진 선택 시 데이터 변환 로직
-                    .onChange(of: selectedItem) { newItem in
-                        Task {
-                            // 선택한 아이템을 데이터로 로드 -> UIImag로 변환
-                            if let data = try? await newItem?.loadTransferable(type: Data.self),
-                               let uiImage = UIImage(data: data) {
-                                // 뷰모델에 저장 ( 메인 스레드에서 UI 업데이트 )
-                                await MainActor.run {
+                    // 러너 카드
+                    RunnerBibView(
+                        nickname: $nickname, // Binding으로 전달
+                        image: viewModel.profileImage,
+                        selectedItem: $selectedItem,
+                        isFocused: _isFocused, // FocusState 전달
+                        onImageChange: { data in
+                            if let uiImage = UIImage(data: data) {
+                                Task { @MainActor in
                                     viewModel.profileImage = uiImage
-                                    HapticManager.instance.impact(style: .light) // 엄청 가벼운 진동
+                                    HapticManager.instance.impact(style: .light)
                                 }
                             }
+                        }
+                    )
+                    // 텍스트 변경 로직 (진동 등)
+                    .onChange(of: nickname) { newValue in
+                        handleNicknameChange(newValue)
+                    }
+                    // 포커스 해제 시 검사 로직
+                    .onChange(of: isFocused) { focused in
+                        if !focused && !isValid && !nickname.isEmpty {
+                            HapticManager.instance.notification(type: .error)
+                            withAnimation(.default) { shakeTrigger += 1 }
                         }
                     }
+                    .modifier(ShakeEffect(animatableData: shakeTrigger))
                     
-                    Spacer() // 좌우 Spacer로 가운데 정렬
-                }
-                
-                // 하단 헬퍼 텍스트 추가
-                Text(viewModel.profileImage == nil ? "나를 대표하는 사진을 올려보세요" : "멋진 사진이에요!")
-                    .font(.caption)
-                    .foregroundColor(viewModel.profileImage == nil ? .gray : .blue)
-                    .animation(.easeInOut, value: viewModel.profileImage)
-            }
-            .padding(.top, 20)
-            .padding(.bottom, 20)
-            
-            // 2. 닉네임 입력창 (박스 스타일)
-            VStack(alignment: .leading,spacing: 8) {
-                
-                // '닉네임 입력' 박스를 프레임으로 씌우자
-                HStack {
-                    TextField("닉네임 입력", text: $nickname)
-                        .font(.title3) // 박스 안의 글자는 조금 줄여서 균형 맞추기
-                        .focused($isFocused) // 화면 켜지면 바로 포커스됨
-                        .padding(.vertical, 4) // 텍스트 위 아래 살짝 여백
-                        .onChange(of: nickname) { newValue in
-                            // 공백 제거 및 글자 수 10자 제한
-                            let filtered = newValue.replacingOccurrences(of: " ", with: "")
-                            if filtered.count > 10 {
-                                nickname = String(nickname.prefix(10))
-                                // 글자수 꽉 차면 가벼운 진동
-                                HapticManager.instance.impact(style: .rigid)
-                            } else {
-                                nickname = filtered
-                            }
-                            
-                            // 진동 상태가 변하는 순간을 저장하는 변수
-                            let currentStatus = (nickname.count >= 2 && nickname.count <= 10)
-                            
-                            // 상태가 달라졌을 때만 진동 (무한 진동 방지)
-                            if currentStatus != isLastValid {
-                                if currentStatus {
-                                    // 성공(Valid)
-                                    HapticManager.instance.notification(type: .success)
-                                }
-                                // 현재 진동 상태 저장
-                                isLastValid = currentStatus
-                            }
+                    // 4. [수정됨] 하단 상태 메시지 (입력창 삭제하고 메시지만 남김)
+                    HStack(spacing: 10) {
+                        // 에러/성공 메시지
+                        if !nickname.isEmpty && !isValid {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .foregroundColor(.red)
+                            Text("2글자 이상 입력해주세요")
+                                .foregroundColor(.red)
+                        } else if isValid {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text("멋진 닉네임이에요!")
+                                .foregroundColor(.green)
+                        } else {
+                            // 비어있을 땐 힌트
+                            Text("닉네임은 최대 10글자까지 가능해요")
+                                .foregroundColor(.gray.opacity(0.5))
                         }
-                    // 실패(Error) -> 2글자 미만이 되었을 떄
-                        .onChange(of: isFocused) { focused in
-                            // 입력중 X + 유효 X + 비어있지않음
-                            if !focused && !isValid && !nickname.isEmpty {
-                                HapticManager.instance.notification(type: .error)
-                                withAnimation(.default) {
-                                    shakeTrigger += 1
-                                }
-                            }
-                        } // onChange
-                    
-                /**
-                     * 상태에 따라 아이콘 바꾸기
-                     - 1순위 : 수정중 + 글자가 있으면 -> 'X' 버튼
-                     - 2순위 : 입력완료 + 유효하다면 -> '체크' 아이콘
-                */
-                    if isFocused && !nickname.isEmpty {
-                        // 입력 중일 땐 지우기가 우선
-                        Button(action: {
-                            nickname = ""
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
-                                .font(.title3)
-                        }
-                    } else if isValid {
-                        // 입력 끝나고 유효해야 키보드 내려갔을 때 성공 표시
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.title3)
-                            .transition(.scale.combined(with: .opacity)) // 나타날 때 살짝 튀어오르는 애니메이션
-                    }
-                }
-                .padding(16) // 박스 내부 여백
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        // 테두리 색상 로직 : 가능(초록) -> 포커스(파랑) -> 평소(회색)
-                        .stroke(isFocused ? Color.blue : (isValid ? Color.green : Color.gray.opacity(0.3)), lineWidth: 1.5)
-                )
-                // 뷰에 ShakeEffect 추가
-                // animatableData 값이 변할 떄 마다 흔들림.
-                .modifier(ShakeEffect(animatableData: shakeTrigger))
-                
-                // 에니메이션 부드럽게 적용
-                .animation(.easeInOut(duration: 0.2), value : isValid)
-                .animation(.easeInOut(duration: 0.2), value : isFocused)
-            
-                // 하단 헬퍼 텍스트 ( 에러 메시지 or 글자수 카운트 )
-                HStack {
-                    if !isFocused && !nickname.isEmpty && !isValid {
-                        // 글자가 있는데 조건이 안 맞을 떄만 에러 메시지 표시
-                        Text("2글자 이상 가능해요")
-                            .font(.caption)
-                            .foregroundColor(.red)
-                            // 투명도 + 위에서 아래로 살짝 내려오는 효과
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    } else if isValid {
-                        // 성공했을 때 칭찬 멘트
-                        Text("멋진 닉네임이에요!")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    } else {
+                        
                         Spacer()
+                        
+                        // 글자 수
+                        Text("\(nickname.count) / 10")
+                            .foregroundColor(isValid ? .gray : .gray.opacity(0.5))
                     }
+                    .font(.caption)
+                    .padding(.horizontal, 40) // 카드 너비랑 비슷하게 맞춤
+                    .animation(.easeInOut, value: isValid)
                     
-                    Spacer() // 오른쪽 정렬을 위해
-                    
-                    // 글자 수 표시 (1/10)
-                    Text("\(nickname.count) / 10")
-                        .font(.caption)
-                        .foregroundColor(isValid ? .gray : .gray.opacity(0.5))
                 }
-                .padding(.horizontal, 4) // 텍스트 위치 살짝 보정
-                
-                // 이 컨테이너 안의 내용이 변할 때 부드럽게 처리하기
-                .animation(.easeInOut(duration: 0.3), value: isValid)
-                .animation(.easeInOut(duration: 0.3), value: isFocused) // 포커스 상태 변화 에니메이션 추가
-                .animation(.easeInOut(duration: 0.3), value: nickname.isEmpty)
+                .padding(.bottom, 50)
             }
-            .padding(.top, 30)
-            .padding(.horizontal, 24)
+            // 배경 터치 시 키보드 내리기
+            .onTapGesture {
+                isFocused = false
+            }
             
-            Spacer()
-            
-            //3. 다음 버튼 ( 1/3 단계 표시 추가 )
-            Button(action: {
-                goNext()
-            }) {
-                HStack(spacing: 15) {
-                    Text("다음")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    
-                    // 단계 표시 (1/3)
-                    Text("1 / 3")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .opacity(0.6) // 살짝 투명하게 해서 '다음' 글자 강조하기
+            // 5. 하단 버튼
+            VStack {
+                Button(action: { goNext() }) {
+                    HStack(spacing: 8) {
+                        Text("다음")
+                            .font(.headline).fontWeight(.bold)
+                        Text("1 / 3")
+                            .font(.subheadline).opacity(0.7)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(isValid ? Color.blue : Color.gray.opacity(0.3))
+                    .cornerRadius(16)
+                    .shadow(color: isValid ? Color.blue.opacity(0.3) : Color.clear, radius: 10, x: 0, y: 5)
                 }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(isValid ? Color.blue : Color.gray.opacity(0.3)) // 비활성화 시 회색
-                .cornerRadius(16)
+                .disabled(!isValid)
             }
-            .disabled(!isValid) // 유효하지 않으면 클릭 불가
             .padding(.horizontal, 24)
-            .padding(.bottom, 10) // 키보드 올라오면 자동으로 위치 조정됨 (키보드 위 여백)
+            .padding(.bottom, 10)
         }
         .onAppear {
-            // 화면 진입 시 0.5초 뒤 키보드 올리기 (자연스러운 UX)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            // 카드 자체가 입력창이니 바로 키보드 띄워주기
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 isFocused = true
             }
         }
-            // 네비게이션 바 커스텀 하기
-            .navigationBarBackButtonHidden(true) // 기본 버튼 숨기기
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss() // 뒤로가기 로직
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.black)
-                            .padding(.leading, 8)
-                    }
-                }
-            }
-        } // 부모 VStack
+        .navigationBarBackButtonHidden(true)
+    }
+    
+    // MARK: - 로직 함수
+    private func handleNicknameChange(_ newValue: String) {
+        // 대문자로 강제 변환 (배번표 느낌 살리기) & 공백 제거
+        let filtered = newValue.uppercased().replacingOccurrences(of: " ", with: "")
         
-        // 다음 화면으로 이동
-        private func goNext() {
-            
-            // 뷰모델에 닉네임 저장
-            viewModel.nickname = nickname
-                    
-            // 다음 단계(성별/나이)로 네비게이션 이동
-            viewModel.navigationPath.append(.genderInfo)
+        if filtered.count > 10 {
+            nickname = String(filtered.prefix(10))
+            HapticManager.instance.impact(style: .rigid)
+        } else {
+            nickname = filtered
+        }
+        
+        let currentStatus = (nickname.count >= 2 && nickname.count <= 10)
+        if currentStatus != isLastValid {
+            if currentStatus { HapticManager.instance.notification(type: .success) }
+            isLastValid = currentStatus
         }
     }
+    
+    private func goNext() {
+        viewModel.nickname = nickname
+        viewModel.navigationPath.append(.genderInfo)
+    }
+}
 
+// MARK: - 러너 카드 (입력 기능 포함)
+struct RunnerBibView: View {
+    @Binding var nickname: String // Binding으로 변경
+    var image: UIImage?
+    @Binding var selectedItem: PhotosPickerItem?
+    @FocusState var isFocused: Bool // 포커스 제어
+    var onImageChange: (Data) -> Void
+    
+    var body: some View {
+        ZStack {
+            // 종이느낌의 배경
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .frame(width: 280, height: 340)
+            
+            // 러너 카드 끝쪽 4부분의 구멍 UI
+            VStack {
+                HStack { Circle().frame(width: 12); Spacer(); Circle().frame(width: 12) }
+                Spacer()
+                HStack { Circle().frame(width: 12); Spacer(); Circle().frame(width: 12) }
+            }
+            .foregroundColor(Color.gray.opacity(0.2))
+            .padding(15)
+            .frame(width: 280, height: 340)
+            
+            // 내용물
+            VStack(spacing: 20) {
+                Text("RUNNING MATE")
+                    .font(.system(size: 14, weight: .black))
+                    .foregroundColor(.gray.opacity(0.5))
+                    .tracking(2)
+                
+                // 프로필 사진 UI
+                PhotosPicker(selection: $selectedItem, matching: .images) {
+                    ZStack {
+                        if let image = image {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 120, height: 120)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.gray.opacity(0.1), lineWidth: 1))
+                        } else {
+                            ZStack {
+                                Circle().fill(Color.gray.opacity(0.05))
+                                Circle().strokeBorder(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [6, 6]))
+                                Image(systemName: "camera.fill")
+                                    .font(.title)
+                                    .foregroundColor(.blue.opacity(0.5))
+                            }
+                            .frame(width: 120, height: 120)
+                        }
+                    }
+                    .frame(width: 120, height: 120)
+                }
+                .onChange(of: selectedItem) { newItem in
+                    Task {
+                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                            onImageChange(data)
+                        }
+                    }
+                }
+                
+                // 러너 카드 내부의 닉네임 입력하는 곳 (RUNNER)
+                VStack(spacing: 4) {
+                    TextField("RUNNER", text: $nickname)
+                        .font(.system(size: 40, weight: .heavy)) // 배번표 폰트
+                        .multilineTextAlignment(.center) // 가운데 정렬
+                        .focused($isFocused)
+                        .textInputAutocapitalization(.characters) // 자동 대문자
+                        .foregroundColor(.black)
+                        .tint(.blue) // 커서 색상
+                        .frame(height: 50)
+                        .minimumScaleFactor(0.5)
+                    
+                    
+                }
+                
+                // 바코드 UI
+                HStack(spacing: 4) {
+                    ForEach(0..<15) { _ in
+                        Rectangle()
+                            .fill(Color.black.opacity(0.8))
+                            .frame(width: CGFloat.random(in: 2...12), height: 20)
+                    }
+                }
+                .opacity(0.3)
+            }
+            .padding(.vertical, 30)
+            .frame(width: 280)
+        }
+    }
+}
 
-// 프리뷰
 #Preview {
     NicknameSettingView(viewModel: LoginViewModel())
 }
