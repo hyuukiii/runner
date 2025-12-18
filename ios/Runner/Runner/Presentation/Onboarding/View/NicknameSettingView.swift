@@ -48,71 +48,88 @@ struct NicknameSettingView: View {
             } // 안내 문구 VStack
             .padding(.top, 40)
             
-            // 프로필 사진 선택 영역 ( 가운데 정렬 )
-            HStack {
-                Spacer() // 좌우 Spacer로 가운데 정렬
-                
-                PhotosPicker(selection: $selectedItem, matching: .images) {
-                    ZStack {
-                        // 1. 프로필 이미지 ( 없으면 기본 아이콘 )
-                        if let image = viewModel.profileImage {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 100, height: 100)
-                                .clipShape(Circle())
-                        } else {
-                            // 선택된 사진이 없을 때 (기본 회색 원 + 사람 아이콘)
-                            Circle()
-                                .fill(Color.gray.opacity(0.1))
-                                .frame(width: 100, height: 100)
-                                .overlay(
-                                    Image(systemName: "person.fill")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.gray.opacity(0.5))
-                                )
-                        }
-                        
-                        // 카메라 배지(우측 하단)
-                        VStack {
-                            Spacer()
-                            HStack {
-                                Spacer()
-                                Image(systemName: "camera.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(.white)
-                                    .padding(6)
-                                    .background(Color.blue)
+            // 프로필 사진 선택 영역
+            VStack(spacing: 12) { // 사진과 아래 테스트 간격
+                HStack {
+                    Spacer()
+                    
+                    PhotosPicker(selection: $selectedItem, matching: .images) {
+                        ZStack {
+                            // 프로필 이미지 ( 없으면 기본 아이콘 )
+                            if let image = viewModel.profileImage {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 160, height: 160)
                                     .clipShape(Circle())
-                                    .overlay (
-                                        Circle()
-                                            .stroke(Color.white, lineWidth: 2) // 흰색 테두리로 분리감 주기
+                                    .overlay(
+                                        Circle().stroke(Color.gray.opacity(0.1), lineWidth: 1)
                                     )
+                            } else {
+                                // 선택된 사진이 없을 때 (점선 플레이스 홀더)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.gray.opacity(0.05)) // 아주 연한 회색 배경
+                                    
+                                    // 점선 테두리
+                                    Circle()
+                                        .strokeBorder(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [6,6]))
+                                    
+                                    // 중앙의 큰 플러스 버튼
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 40, weight: .light))
+                                        .foregroundColor(.blue.opacity(0.6)) // 브랜드 컬러
+                                }
+                                .frame(width: 160, height: 160)
                             }
+                            
+                            // 카메라 배지(우측 하단)
+                            VStack {
+                                Spacer()
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                        .padding(8)
+                                        .background(Color.blue)
+                                        .clipShape(Circle())
+                                        .overlay (
+                                            Circle().stroke(Color.white, lineWidth: 2) // 흰색 테두리로 분리감 주기
+                                        )
+                                        .shadow(color: Color.black.opacity(0.2), radius: 3, x: 1, y: 2)
+                                }
+                            }
+                            .frame(width: 150, height: 150)
                         }
-                    }
-                    .frame(width: 100, height: 100) // 전체 터치 영역
-                } // PhotosPicker
-                
-                // 사진 선택 시 데이터 변환 로직
-                .onChange(of: selectedItem) { newItem in
-                    Task {
-                        // 선택한 아이템을 데이터로 로드 -> UIImag로 변환
-                        if let data = try? await newItem?.loadTransferable(type: Data.self),
+                    } // PhotosPicker
+                    
+                    // 사진 선택 시 데이터 변환 로직
+                    .onChange(of: selectedItem) { newItem in
+                        Task {
+                            // 선택한 아이템을 데이터로 로드 -> UIImag로 변환
+                            if let data = try? await newItem?.loadTransferable(type: Data.self),
                                let uiImage = UIImage(data: data) {
                                 // 뷰모델에 저장 ( 메인 스레드에서 UI 업데이트 )
-                            await MainActor.run {
-                                viewModel.profileImage = uiImage
-                                HapticManager.instance.impact(style: .light) // 엄청 가벼운 진동
+                                await MainActor.run {
+                                    viewModel.profileImage = uiImage
+                                    HapticManager.instance.impact(style: .light) // 엄청 가벼운 진동
+                                }
                             }
                         }
                     }
+                    
+                    Spacer() // 좌우 Spacer로 가운데 정렬
                 }
                 
-                Spacer() // 좌우 Spacer로 가운데 정렬
+                // 하단 헬퍼 텍스트 추가
+                Text(viewModel.profileImage == nil ? "나를 대표하는 사진을 올려보세요" : "멋진 사진이에요!")
+                    .font(.caption)
+                    .foregroundColor(viewModel.profileImage == nil ? .gray : .blue)
+                    .animation(.easeInOut, value: viewModel.profileImage)
             }
             .padding(.top, 20)
-            .padding(.bottom, 10)
+            .padding(.bottom, 20)
             
             // 2. 닉네임 입력창 (박스 스타일)
             VStack(alignment: .leading,spacing: 8) {
