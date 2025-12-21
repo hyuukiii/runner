@@ -115,14 +115,18 @@ struct BirthDateView: View {
         }
     
         private func goNext() {
-            // 날짜(Date)에서 연도(Year)만 쏙 뽑아서 뷰모델에 저장
-            let calendar = Calendar.current
-            let year = calendar.component(.year, from: birthDate)
+            // 1. 날짜 형식을 지정해주는 포멧터 생성
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd" // 서버랑 약속한 상태 ( 대소문자 중요 )
+            formatter.locale = Locale(identifier: "ko_KR")
             
-            viewModel.birthYear = year //DTO가 year(년도)만 받으니깐
+            // 2. Date 객체 -> 1991-01-01 문자열로 변환
+            let dateString = formatter.string(from: birthDate)
             
-            // 만약 나중에 DTO가 생년월일 전체를 받는다면?
-            // viewModel.birthDate = birthDate
+            // 3. 뷰모델에 저장
+            viewModel.birthDate = dateString
+            
+            print("서버로 보낼 생년월일 : \(dateString)") // 디버깅
             
             viewModel.navigationPath.append(.genderInfo)
         }

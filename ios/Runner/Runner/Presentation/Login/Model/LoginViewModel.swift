@@ -15,7 +15,9 @@ class LoginViewModel: ObservableObject {
     @Published var region: String = ""
     @Published var nickname: String = ""
     @Published var gender: String = ""
-    @Published var birthYear: Int = 0
+    
+    // 문자열string 에서 -> 서버로 보낼 2000-01-01 형태로 변경
+    @Published var birthDate: String = ""
     
     // 프로필 이미지 저장 변수
     @Published var profileImage: UIImage? = nil
