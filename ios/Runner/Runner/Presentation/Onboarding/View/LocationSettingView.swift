@@ -137,7 +137,6 @@ struct RoundedCorner: Shape {
 }
 
 #Preview {
-    // 여기에 더미 데이터를 넣어서 미리보기를 만듭니다.
     LocationSettingView(viewModel: LoginViewModel())
 }
     

@@ -21,7 +21,7 @@ struct RunnerBibView: View {
     var image: UIImage?
     @Binding var selectedItem: PhotosPickerItem?
     
-    // 2. 🔥 핵심: 부모 뷰와 포커스 상태를 공유하기 위해 Binding 사용
+    // 2. 부모 뷰와 포커스 상태를 공유하기 위해 Binding 사용
     @FocusState.Binding var isFocused: Bool
     
     // 3. 이미지 변경 이벤트 클로저
@@ -83,13 +83,13 @@ struct RunnerBibView: View {
                     }
                 }
                 
-                // 러너 카드 내부의 닉네임 입력하는 곳 (RUNNER)
+                // MARK: - 러너 카드 내부의 닉네임 입력하는 곳 (RUNNER)
                 VStack(spacing: 4) {
                     TextField("RUNNER", text: $nickname)
-                        .font(.system(size: 40, weight: .heavy)) // 배번표 폰트
-                        .multilineTextAlignment(.center) // 가운데 정렬
-                        .focused($isFocused) // 🔥 바인딩된 포커스 연결
-                        .textInputAutocapitalization(.characters) // 자동 대문자
+                        .font(.system(size: 40, weight: .heavy))    // 배번표 폰트
+                        .multilineTextAlignment(.center)            // 가운데 정렬
+                        .focused($isFocused)                        // 바인딩된 포커스 연결
+                        .textInputAutocapitalization(.characters)   // 자동 대문자
                         .foregroundColor(.black)
                         .tint(.blue) // 커서 색상
                         .frame(height: 50)

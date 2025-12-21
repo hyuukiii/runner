@@ -16,7 +16,6 @@ import SwiftUI
 
 struct BirthDateView: View {
     @ObservedObject var viewModel: LoginViewModel
-    @Environment(\.dismiss) private var dismiss
     
     // 선택된 날짜 ( 기본값 : 2000년 1월 1일 )
     @State private var birthDate: Date = {
@@ -39,17 +38,7 @@ struct BirthDateView: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            // 상단 네비게이션
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.black)
-                }
-                Spacer()
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 10)
+            BackButtonHeader()
             
             VStack(spacing : 40) {
                 

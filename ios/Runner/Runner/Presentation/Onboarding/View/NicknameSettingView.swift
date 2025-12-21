@@ -17,7 +17,6 @@ import PhotosUI
 
 struct NicknameSettingView: View {
     @ObservedObject var viewModel: LoginViewModel
-    @Environment(\.dismiss) private var dismiss
     
     // 상태 변수
     @State private var nickname: String = ""
@@ -29,19 +28,12 @@ struct NicknameSettingView: View {
     private var isValid: Bool {
         return nickname.count >= 2 && nickname.count <= 10 && !nickname.contains(" ")
     }
-    
+    // MARK: - UI영역
     var body: some View {
         VStack(spacing: 0) {
             
-            // 1. 상단 네비게이션
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.black)
-                }
-                Spacer()
-            }
+            BackButtonHeader()
+            
             .padding(.horizontal, 24)
             .padding(.top, 10)
             
