@@ -107,8 +107,27 @@ struct GenderView: View {
         
         print("최종 데이터 확인: \(viewModel.email), \(viewModel.nickname), \(viewModel.birthDate), \(viewModel.gender)")
         
-        // 서버 통신 요청(LoginViewMopdel에 함수가 있다고 가정)
-        // viewModel.requestJoin()
+        // 이미지 데이터도 확인하기
+        if let image = viewModel.profileImage {
+            // 이미지 크기와 용량( Byte )을 확인
+            let dataSize = image.jpegData(compressionQuality: 0.5)?.count ?? 0
+            print("📸 프로필 이미지: 있음 (해상도: \(image.size), 용량: \(dataSize) bytes)")
+        } else {
+            print("📸 프로필 이미지: 없음 (nil) ⚠️")
+        }
+        
+        Task {
+            // 비동기 함수 호출
+            let isSuccess = await viewModel.requestJoin()
+            
+            if(isSuccess) {
+                print("🎉 UI: 가입 성공! 홈으로 이동합니다.")
+                // 성공 시 메인화면 이동 로직 (예: viewModel.navigationPath = [])
+            } else {
+                // TODO: 정말 추후에 가입실패 화면도 만들 것 ( 그럴일이 있을려나 )
+                print("가입실패 시발!!! ")
+            }
+        }
     }
 }
 
