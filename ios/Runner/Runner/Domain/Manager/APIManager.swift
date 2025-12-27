@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import UIKit
 
 class APIManager {
     
-    //싱글톤 패턴 (전국에 지점이 하나뿐인 본점)
+    // 싱글톤 패턴 (전국에 지점이 하나뿐인 본점)
     static let shared = APIManager()
     
     // 서버 주소 (시뮬레이터에서 맥북 localhost는 localhost로 통함)
@@ -17,8 +18,9 @@ class APIManager {
     let baseURL = "http://localhost:8080"
     
     
+    // MARK: 러닝 기록 업로드 함수
     /**
-      * 러닝 기록 업로드 함수
+      *
       * completion : 완료되면 실행할 것, @escaping : 탈출한다
       * (Bool) : 성공/실패(True/false) 반환
       * Void   : 결과 반환 x, 할 일만 하고 끝냄
@@ -78,8 +80,10 @@ class APIManager {
         
     } // uploadRunningRecord
     
+    
+    // MARK: 이메일 인증번호 요청
     /**
-        1. 이메일 인증번호 요청 (POST / auth/ send-code)
+        * API:  (POST / auth/ send-code)
      */
     func sendVerificationCode(email: String, completion: @escaping (Bool) -> Void) {
         guard let url = URL(string: "\(baseURL)/auth/send-code") else { return }
@@ -114,8 +118,10 @@ class APIManager {
         }.resume()
     } // sendVerificationCode
     
+    
+    // MARK: 인증번호 검증 & 로그인
     /**
-        인증번호 검증 & 로그인
+        * API: (POST)/auth/verify
      */
     func verifyCode(email: String, code: String, completion: @escaping (Bool) -> Void) {
         guard let url = URL(string: "\(baseURL)/auth/verify") else { return }
@@ -142,5 +148,79 @@ class APIManager {
         }.resume()
     } // verifyCode
     
+    // MARK: 회원가입 요청
+    /**
+        * async / await 방식 사용
+        * MultiPart - ( JSON + Image )
+     */
+    func join(dto: UserJoinRequest, image: UIImage?) async -> Bool {
+        
+        // BaseURL 재사용
+        guard let url = URL(string: "\(baseURL)/users/join") else { return false}
+        
+        // Request 생성
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        // Boundary 설정
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        // Body 생성 (헬퍼 함수{ createJSONBODY } 호출)
+        request.httpBody = createJSONBODY(dto: dto, boundary: boundary, image: image, filename: "profile.jpg")
+        
+        // 전송 ( async / await )
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
             
-} // class
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("✅ 회원가입 성공")
+                return true
+            } else {
+                print("❌ APIManager: 실패 (Status: \((response as? HTTPURLResponse)?.statusCode ?? 0))")
+                if let errorMsg = String(data: data, encoding: .utf8) {
+                    print("서버 에러 메시지 :\(errorMsg)")
+                }
+                return false
+            }
+        } catch {
+            print("❌ APIManager: 네트워크 에러 - \(error.localizedDescription)")
+            return false
+        }
+    } // join()
+    
+    // MARK: MultiPart Body 생성기
+    func createJSONBODY(dto: UserJoinRequest,
+                        boundary: String,
+                        image: UIImage?,
+                        filename: String) -> Data {
+        
+        var body = Data()
+        let boundaryPrefix = "--\(boundary)\r\n"
+        let lineBreak = "\r\n"
+        
+        // JSON 데이터 추가
+        if let jsonData = try? JSONEncoder().encode(dto),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            
+            body.append(boundaryPrefix.data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"request\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
+            body.append("\(jsonString)\r\n".data(using: .utf8)!)
+        }
+        
+        // 2. 이미지 데이터 추가
+        if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
+            body.append(boundaryPrefix.data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"profileImage\"; filename=\"\(filename)\"\r\n".data(using:.utf8)!)
+            body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+                
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        return body
+    } // createJSONBODY
+    
+        
+    } // class

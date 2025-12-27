@@ -8,6 +8,17 @@ import SwiftUI
 import Combine
 import UIKit // UIImage 사용을 위해 추가
 
+
+// MARK: 구조체의 한덩어리로 회원가입의 데이터를 받기
+struct UserJoinRequest: Encodable {
+    let appleUserId : String
+    let email       : String
+    let region      : String
+    let nickname    : String
+    let gender      : String
+    let birthDate   : String
+}
+
 class LoginViewModel: ObservableObject {
     // 입력 받은( 받아야할 ) 데이터
     @Published var email: String = ""
@@ -21,7 +32,6 @@ class LoginViewModel: ObservableObject {
     
     // 프로필 이미지 저장 변수
     @Published var profileImage: UIImage? = nil
-    
     @Published var navigationPath: [LoginStep] = [] // 화면 이동 경로 (이 배열에 값을 넣으면 화면이 바뀜)
     
     // 부가적 기능
@@ -30,18 +40,14 @@ class LoginViewModel: ObservableObject {
     @Published var shakeTrigger: Int = 0
     @Published var isLoading: Bool = false // 로딩 상태 변수
     
-    /**
-      * 이메일 형식 검사 하는 정규식 함수
-     */
+    // MARK: 이메일 형식 검사 하는 정규식 함수
     func isValidEmail(_ email: String) -> Bool {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPred  = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
     }
     
-    /**
-      * 이메일 전송
-     **/
+    // MARK: 이메일 전송
     func sendCode() {
         // 이메일 소문자변환
         let cleanEmail = email.sanitizedEmail
@@ -59,7 +65,7 @@ class LoginViewModel: ObservableObject {
             showError = false
         }
             
-        // 2. 서버 전송
+        // 서버 전송
         APIManager.shared.sendVerificationCode(email: cleanEmail) {success in
             DispatchQueue.main.async {
                 // 로딩 종료 (약간의 딜레이를 줘서 빨리 깜빡이는것을 방지함) 만약 서버가 너무 빠르면 0.5초정도 보여기
@@ -77,13 +83,11 @@ class LoginViewModel: ObservableObject {
                     self.showError = true
                     self.shakeTrigger += 1
                 }
-            }
-        }
+            } // DisPatchQueue
+        } // APIManager
     } // sendCode
     
-    /**
-      * 코드 검증 (성공하면 true 반환)
-     **/
+    // MARK: 코드 검증 (성공하면 true 반환)
     func verifyCode() {
         let cleanEmail = email.sanitizedEmail
         let cleanCode = code.sanitizedCode
@@ -103,4 +107,26 @@ class LoginViewModel: ObservableObject {
         }
     } // verifyCode
     
+    // MARK: 회원가입 요청 함수
+    func requestJoin() async -> Bool {
+        
+        // 보낼 데이터 만들기
+        let joinDTO = UserJoinRequest(
+            appleUserId: "TEST_APPLE_ID_123",
+            email: self.email,
+            region: self.region,
+            nickname: self.nickname,
+            gender: self.gender,
+            birthDate: self.birthDate
+        )
+        
+        // APIManager 를 호출 하여 joinDTO를 전송한다
+        // 싱글톤 인스턴스 사용
+        let isSuccess = await APIManager.shared.join(
+            dto: joinDTO,
+            image: self.profileImage
+        )
+        
+        return isSuccess
+    }
 } // class

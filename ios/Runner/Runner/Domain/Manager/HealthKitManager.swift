@@ -41,7 +41,7 @@ class HealthKitManager: ObservableObject {
         // read: 위에서 정의한 readTypes
         healthStore.requestAuthorization(toShare: nil, read: readTypes) { (success, error) in
             if success {
-                print("HealthKit 권한승인 완료! 이제 데이터를 읽어 올게요")
+                print("HealthKit 권한승인 완료!")
                 
                 // 승인되자마자 바로 데이터 가져오기
                 self.fetchRunningStats()

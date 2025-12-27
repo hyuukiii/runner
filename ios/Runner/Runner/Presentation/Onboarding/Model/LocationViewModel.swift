@@ -44,7 +44,7 @@ class LocationViewModel: ObservableObject {
                 withAnimation {
                     self.region.center = coordinate
                 }
-                //이동한 곳 주소도 바로 찾기
+                // 이동한 곳 주소도 바로 찾기
                 self.updateAddressFromMap()
             }
             .store(in: &cancellabls)

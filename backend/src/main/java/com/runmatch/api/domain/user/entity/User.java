@@ -10,9 +10,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 
 @Entity
 @Getter
@@ -42,7 +39,7 @@ public class User {
     private Gender gender;
 
     @Column(nullable = false)
-    private Integer birthYear; // 나이 계산용
+    private LocalDate birthDate; // 나이 계산용
 
     @Column(length = 30)
     private String region; // 활동 지역

@@ -146,7 +146,7 @@ struct NicknameSettingView: View {
     
     private func goNext() {
         viewModel.nickname = nickname
-        viewModel.navigationPath.append(.genderInfo)
+        viewModel.navigationPath.append(.birthdayInfo)
     }
 }
 

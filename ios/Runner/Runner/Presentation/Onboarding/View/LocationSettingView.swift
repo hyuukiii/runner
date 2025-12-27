@@ -12,33 +12,34 @@ struct LocationSettingView: View {
     @ObservedObject var viewModel: LoginViewModel
     @StateObject private var locationVM = LocationViewModel()
     
+    // MARK: Body 디자인 시작
     var body: some View {
         ZStack(alignment: .bottom) {
             
-            // 1. 지도 (배경)
+            // MARK: 지도 (배경)
             Map(coordinateRegion: $locationVM.region, interactionModes: .all, showsUserLocation: true)
                 .ignoresSafeArea()
                 .onChange(of: locationVM.region.center.latitude) { _ in
                     locationVM.updateAddressFromMap()
                 }
             
-            // 하단 정보 시트
+            // MARK: 하단 정보 시트
             VStack(spacing: 0) { // Spacing을 0으로 하고 Spacer()로 조절
                 
-                // 상단 영역 : 안내 멘트 & 핵심 위치 정보
+                // MARK: 상단 영역 : 안내 멘트 & 핵심 위치 정보
                 VStack(spacing: 10) {
                     Text(" 매칭을 위해 사는 지역이 필요해요 ")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .padding(.top, 20) // 시트 위쪽 여백
                     
-                    // 위치 표시 텍스트
+                    // MARK: 위치 표시 텍스트
                     HStack(spacing: 0) {
                         Text("현재 계신 곳은 ")
                             .font(.title3)
                             .foregroundColor(.black)
                         
-                        // 로딩 중 애니메이션 or 동네 이름
+                        // MARK: 로딩 중 애니메이션 or 동네 이름
                         if locationVM.dongName.isEmpty {
                             BlinkingDots()
                         } else {
@@ -66,7 +67,7 @@ struct LocationSettingView: View {
                             completeSetting()
                         }
                     }) {
-                        Text("시작하기")
+                        Text(" 다음 ")
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -76,7 +77,7 @@ struct LocationSettingView: View {
                     }
                     .disabled(locationVM.dongName.isEmpty)
                     
-                    // 변경 안내 (맨 아래 배치)
+                    // MARK: 마이페이지 변경 안내 (맨 아래 배치)
                     Text("마이페이지에서 언제든지 변경할 수 있어요")
                         .font(.caption2)
                         .foregroundColor(Color.gray.opacity(0.7))
@@ -95,14 +96,16 @@ struct LocationSettingView: View {
         }
     }
     
+    // MARK: 다음 화면으로 넘어가는 함수
     private func completeSetting() {
         print("최종 선택: \(locationVM.dongName)")
-        UserManager.shared.currentUserId = 1
-        viewModel.navigationPath = []
+        // 선택한 지역은 VM의 dongName에 임시 저장 최종 회원가입 화면단에서 LoginViewModel에 저장 해야 하니
+        viewModel.region = locationVM.dongName
+        viewModel.navigationPath.append(.nickname)
     }
 }
 
-// ✨ " . . . " 깜빡이는 애니메이션 뷰
+// MARK: 깜빡이는 애니메이션 뷰
 struct BlinkingDots: View {
     @State private var isActive = false
     
@@ -120,13 +123,14 @@ struct BlinkingDots: View {
     }
 }
 
-// 둥근 모서리 확장
+// MARK: 둥근 모서리 확장
 extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
     }
 }
 
+// MARK: 코너의 쉐입을 설정하는 구조체
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
@@ -135,6 +139,7 @@ struct RoundedCorner: Shape {
         return Path(path.cgPath)
     }
 }
+
 
 #Preview {
     LocationSettingView(viewModel: LoginViewModel())

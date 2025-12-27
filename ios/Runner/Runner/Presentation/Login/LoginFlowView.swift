@@ -27,15 +27,16 @@ struct LoginFlowView: View {
                             CodeInputView(viewModel: viewModel)
                         case .healthAuth:
                             HealthAuthView(viewModel: viewModel) // viewModel 넘겨주기
-                                .navigationBarBackButtonHidden(true)// 건강앱 연동 플로우에서는 뒤로가기 블락
+                                .navigationBarBackButtonHidden(true) // 뒤로가기 블락
                         case .locationSetting:
                             LocationSettingView(viewModel: viewModel)
                                 .navigationBarBackButtonHidden(true)
                         case .nickname:
                             NicknameSettingView(viewModel: viewModel)
-                        
+                        case .birthdayInfo:
+                            BirthDateView(viewModel: viewModel)
                         case .genderInfo:
-                            Text("성별/나이 입력화면 예정")
+                            GenderView(viewModel: viewModel)
                         }
                     } // navigationDestination
                 
