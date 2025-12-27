@@ -42,7 +42,7 @@ struct BirthDateView: View {
             
             VStack(spacing : 40) {
                 
-                //타이틀
+                // 타이틀
                 VStack(spacing: 10) {
                     Text("생년월일을 알려주세요")
                         .font(.system(size: 26, weight: .bold))

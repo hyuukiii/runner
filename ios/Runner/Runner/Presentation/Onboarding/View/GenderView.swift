@@ -44,7 +44,7 @@ struct GenderView: View {
                         .multilineTextAlignment(.center)
                         .lineSpacing(5)
                     
-                    Text("러닝 데이터 분석에 활용 돼요")
+                    Text("러닝 데이터 분석에 필요해요")
                         .font(.body)
                         .foregroundColor(.gray)
                 }

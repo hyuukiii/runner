@@ -32,26 +32,17 @@ struct NicknameSettingView: View {
     var body: some View {
         VStack(spacing: 0) {
             
+            // 공통 헤더 ( 뒤로가기 )
             BackButtonHeader()
             
-            .padding(.horizontal, 24)
-            .padding(.top, 10)
-            
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 40) { // 간격 시원하게 조정
+                VStack(spacing: 40) { // 간격 조정
                     
-                    // 2. 타이틀
-                    VStack(spacing: 8) {
-                        Text("나만의 러너 카드를\n만들어보세요") // 줄바꿈 추가하면 더 예쁨
-                            .font(.system(size: 24, weight: .bold))
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(5)
-                        
-                        Text("사진과 닉네임을 눌러 수정할 수 있어요")
-                            .font(.footnote)
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.top, 45)
+                    // 타이틀
+                    OnboardingTitleView(
+                        title: "나만의 러너 카드를\n만들어보세요",
+                        subTitle: "사진과 닉네임을 눌러 수정할 수 있어요"
+                    )
                     
                     // 3. 러너 카드 (컴포넌트 호출)
                     RunnerBibView(
@@ -117,21 +108,12 @@ struct NicknameSettingView: View {
             
             // 5. 하단 버튼
             VStack {
-                Button(action: { goNext() }) {
-                    HStack(spacing: 8) {
-                        Text("다음")
-                            .font(.headline).fontWeight(.bold)
-                        Text("1 / 3")
-                            .font(.subheadline).opacity(0.7)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(isValid ? Color.blue : Color.gray.opacity(0.3))
-                    .cornerRadius(16)
-                    .shadow(color: isValid ? Color.blue.opacity(0.3) : Color.clear, radius: 10, x: 0, y: 5)
-                }
-                .disabled(!isValid)
+                BottomStepButton(
+                    title: "다음",
+                    currentStep: 1,
+                    isEnabled: isValid, // 유효성 검사 변수만 넘겨주기
+                    action: goNext // 실행 할 함수
+                )
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 10)
