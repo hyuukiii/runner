@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,11 +51,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserTier tier;
 
-    // --- 프로필 이미지 리스트 (JPA 표준)
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "user_profile_image", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "image_url")
-    private List<String> profileImages = new ArrayList<>();
+    // 가입 시 사진 한장을 받으므로 List 형식이 아닌 단일 형식
+    // TODO : 여러 사진 저장이 필요 하다면 나중에 별도 테이블로 분리
+    @Column(name = "profile_image_url")
+    private String profileImageURL;
 
     // ======== 타임스탬프 자동관리 =======
     @CreatedDate
@@ -70,12 +70,13 @@ public class User {
     }
 
     // 생성자 메서드
-    public User(String appleUserId, String nickname, String email, Gender gender, Integer birthYear, String region) {
+    public User(String appleUserId, String nickname, String email, Gender gender, LocalDate birthDate, String region, String profileImageURL) {
         this.appleUserId = appleUserId;
         this.nickname = nickname;
+        this.profileImageURL = profileImageURL;
         this.email = email;
         this.gender = gender;
-        this.birthYear = birthYear;
+        this.birthDate = birthDate;
         this.region = region;
         this.tier = UserTier.STARTER;
     }

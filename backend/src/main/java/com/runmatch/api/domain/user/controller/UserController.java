@@ -5,7 +5,11 @@ import com.runmatch.api.domain.user.entity.User;
 import com.runmatch.api.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.awt.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,11 +19,16 @@ public class UserController {
     private final UserService userService;
 
     // 회원가입 API
-    @PostMapping("/join")
-    public String join(@Valid @RequestBody UserJoinRequest request) {
-        Long userId = userService.join(request);
+    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String join(
+            // JSON 데이터 ( IOS 에서 name = " request "로 보낸 것 )
+            @RequestPart(value = "request") @Valid UserJoinRequest request,
+            // 이미지 파일 ( IOS 에서 name = "profileImage"로 보낸 것 )
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+    ) {
+        Long userId = userService.join(request, profileImage);
 
-        return "회원가입 성공 User Id" + userId;
+       return "회원가입 성공" + userId;
     }
 
     // 임시) 내 정보 조회 API

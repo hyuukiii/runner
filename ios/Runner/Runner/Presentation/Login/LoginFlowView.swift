@@ -13,7 +13,7 @@ struct LoginFlowView: View {
     
     var body: some View {
         ZStack {
-            // NavigationStack: 화면 쌓기 관리자 (iOS 16+)
+            // MARK: NavigationStack: 화면 쌓기 관리자 (iOS 16+)
             NavigationStack(path: $viewModel.navigationPath) {
                 
                 // 1. 첫 화면: 이메일 입력
