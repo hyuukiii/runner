@@ -13,18 +13,17 @@ struct OnboardingTitleView: View {
     let subTitle: String
     
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             Text(title)
-                .font(.system(size: 26, weight: .bold))
+                .font(.system(size: 22, weight: .semibold))
                 .multilineTextAlignment(.center)
-                .lineSpacing(5) // 줄 간격
-                .minimumScaleFactor(0.6) // 공간 부족하면 글자를 60%까지 줄여서라도 다 보여주기
+                .lineSpacing(4)
+                .minimumScaleFactor(0.8)
             
             Text(subTitle)
-                .font(.body)
-                .foregroundColor(.gray)
+                .font(.footnote)
+                .foregroundColor(.gray.opacity(0.8))
                 .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.8) // 서브타이틀도 유연하게 줄어듦
         }
         .padding(.horizontal, 24)
     }

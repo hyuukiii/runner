@@ -38,10 +38,10 @@ struct NicknameSettingView: View {
             
             VStack(spacing: 0) {
                 
-                // 1. 헤더
+                // 헤더
                 BackButtonHeader()
                 
-                // 2. 메인 콘텐츠 (중앙 정렬)
+                // MARK: - 메인 콘텐츠
                 VStack(spacing: 0) {
                     
                     Spacer() // 위쪽 여백 자동 조절
@@ -54,7 +54,7 @@ struct NicknameSettingView: View {
                     .layoutPriority(1)
                     .padding(.bottom, uiScale < 1.0 ? 10 : 30)
                     
-                    // 러너 카드
+                    // MARK: - 러너 카드
                     RunnerBibView(
                         nickname: $nickname,
                         image: viewModel.profileImage,
@@ -83,7 +83,7 @@ struct NicknameSettingView: View {
                     
                     .modifier(ShakeEffect(animatableData: shakeTrigger))
                     
-                    // 하단 메시지
+                    // MARK: - 하단 메시지
                     HStack(spacing: 10) {
                         if !nickname.isEmpty && !isValid {
                             Image(systemName: "exclamationmark.circle.fill").foregroundColor(.red)
@@ -100,9 +100,9 @@ struct NicknameSettingView: View {
                         Text("\(nickname.count) / 10").foregroundColor(isValid ? .gray : .gray.opacity(0.5))
                     }
                     
-                    .font(.caption)
+                    .font(.system(size: 10, weight: .light) )
                     .padding(.top, 2)
-                    .padding(.horizontal, 15)
+                    .padding(.horizontal, 55)
                     .animation(.easeInOut, value: isValid)
                     
                     Spacer() // 아래쪽 여백 자동 조절

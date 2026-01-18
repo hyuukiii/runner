@@ -16,12 +16,12 @@ struct RunnerBibView: View {
     var onImageChange: (Data) -> Void
     
     // 카드 고정 크기 정의
-    private let cardWidth: CGFloat = 280
-    private let cardHeight: CGFloat = 320
+    private let cardWidth: CGFloat = 230
+    private let cardHeight: CGFloat = 280
     
     var body: some View {
         ZStack {
-            // 1. 배경 (높이 적용)
+            // 배경 (높이 적용)
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
@@ -38,10 +38,10 @@ struct RunnerBibView: View {
             .frame(width: cardWidth, height: cardHeight)
             
             // 3. 콘텐츠 (간격 조정)
-            // 👈 내부 요소 간격을 20에서 15로 줄여서 공간 절약
+            // 내부 요소 간격을 20에서 15로 줄여서 공간 절약
             VStack(spacing: 15) {
                 Text("RUNNING MATE")
-                    .font(.system(size: 14, weight: .black))
+                    .font(.system(size: 12, weight: .black))
                     .foregroundColor(.gray.opacity(0.5))
                     .tracking(2)
                     .padding(.top, 5) // 상단에 살짝 여백 추가
@@ -82,7 +82,7 @@ struct RunnerBibView: View {
                 // 닉네임 입력 필드
                 VStack(spacing: 4) {
                     TextField("RUNNER", text: $nickname)
-                        .font(.system(size: 40, weight: .heavy))
+                        .font(.system(size: 25, weight: .heavy))
                         .multilineTextAlignment(.center)
                         .focused($isFocused)
                         .textInputAutocapitalization(.characters)
