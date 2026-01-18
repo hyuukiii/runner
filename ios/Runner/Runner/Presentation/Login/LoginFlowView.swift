@@ -16,27 +16,35 @@ struct LoginFlowView: View {
             // MARK: NavigationStack: 화면 쌓기 관리자 (iOS 16+)
             NavigationStack(path: $viewModel.navigationPath) {
                 
-                // 1. 첫 화면: 이메일 입력
+                // MARK: 첫 화면: 이메일 입력
                 EmailInputView(viewModel: viewModel)
                     // 경로 처리: .codeInput 신호가 오면 CodeInputView로 이동
                     .navigationDestination(for: LoginStep.self) { step in
                         switch step {
                         case .email:
                             EmptyView() // 이메일 단계에선 불 필요
+                            
                         case .codeInput:
                             CodeInputView(viewModel: viewModel)
+                            
                         case .healthAuth:
                             HealthAuthView(viewModel: viewModel) // viewModel 넘겨주기
                                 .navigationBarBackButtonHidden(true)// 건강앱 연동 플로우에서는 뒤로가기 블락
+                            
                         case .locationSetting:
                             LocationSettingView(viewModel: viewModel)
                                 .navigationBarBackButtonHidden(true)
+                            
                         case .nickname:
                             NicknameSettingView(viewModel: viewModel)
-                        
+                            
+                        case .birthDateInfo:
+                            BirthDateView(viewModel: viewModel)
+                
                         case .genderInfo:
-                            Text("성별/나이 입력화면 예정")
+                            GenderView(viewModel: viewModel)
                         }
+                        
                     } // navigationDestination
                 
         } // NavigationStack

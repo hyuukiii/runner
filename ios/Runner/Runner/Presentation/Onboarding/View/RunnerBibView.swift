@@ -5,37 +5,29 @@
 //  Created by 윤현기 on 12/19/25.
 //
 
-//
-//  RunnerBibView.swift
-//  Runner
-//
-//  Created by 윤현기 on 12/19/25.
-//
-
 import SwiftUI
 import PhotosUI
 
 struct RunnerBibView: View {
-    // 1. 데이터 바인딩
     @Binding var nickname: String
     var image: UIImage?
     @Binding var selectedItem: PhotosPickerItem?
-    
-    // 2. 부모 뷰와 포커스 상태를 공유하기 위해 Binding 사용
     @FocusState.Binding var isFocused: Bool
-    
-    // 3. 이미지 변경 이벤트 클로저
     var onImageChange: (Data) -> Void
+    
+    // 카드 고정 크기 정의
+    private let cardWidth: CGFloat = 280
+    private let cardHeight: CGFloat = 320
     
     var body: some View {
         ZStack {
-            // 종이 느낌의 배경
+            // 1. 배경 (높이 적용)
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                .frame(width: 280, height: 340)
+                .frame(width: cardWidth, height: cardHeight)
             
-            // 러너 카드 끝쪽 4부분의 구멍 UI
+            // 2. 모서리 구멍 디테일
             VStack {
                 HStack { Circle().frame(width: 12); Spacer(); Circle().frame(width: 12) }
                 Spacer()
@@ -43,16 +35,18 @@ struct RunnerBibView: View {
             }
             .foregroundColor(Color.gray.opacity(0.2))
             .padding(15)
-            .frame(width: 280, height: 340)
+            .frame(width: cardWidth, height: cardHeight)
             
-            // 내용물
-            VStack(spacing: 20) {
+            // 3. 콘텐츠 (간격 조정)
+            // 👈 내부 요소 간격을 20에서 15로 줄여서 공간 절약
+            VStack(spacing: 15) {
                 Text("RUNNING MATE")
                     .font(.system(size: 14, weight: .black))
                     .foregroundColor(.gray.opacity(0.5))
                     .tracking(2)
+                    .padding(.top, 5) // 상단에 살짝 여백 추가
                 
-                // 프로필 사진 UI
+                // 사진 피커
                 PhotosPicker(selection: $selectedItem, matching: .images) {
                     ZStack {
                         if let image = image {
@@ -65,7 +59,10 @@ struct RunnerBibView: View {
                         } else {
                             ZStack {
                                 Circle().fill(Color.gray.opacity(0.05))
-                                Circle().strokeBorder(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [6, 6]))
+                                Circle().strokeBorder(
+                                    Color.gray.opacity(0.3),
+                                    style: StrokeStyle(lineWidth: 2, dash: [6, 6])
+                                )
                                 Image(systemName: "camera.fill")
                                     .font(.title)
                                     .foregroundColor(.blue.opacity(0.5))
@@ -73,7 +70,6 @@ struct RunnerBibView: View {
                             .frame(width: 120, height: 120)
                         }
                     }
-                    .frame(width: 120, height: 120)
                 }
                 .onChange(of: selectedItem) { newItem in
                     Task {
@@ -83,20 +79,22 @@ struct RunnerBibView: View {
                     }
                 }
                 
-                // MARK: - 러너 카드 내부의 닉네임 입력하는 곳 (RUNNER)
+                // 닉네임 입력 필드
                 VStack(spacing: 4) {
                     TextField("RUNNER", text: $nickname)
-                        .font(.system(size: 40, weight: .heavy))    // 배번표 폰트
-                        .multilineTextAlignment(.center)            // 가운데 정렬
-                        .focused($isFocused)                        // 바인딩된 포커스 연결
-                        .textInputAutocapitalization(.characters)   // 자동 대문자
+                        .font(.system(size: 40, weight: .heavy))
+                        .multilineTextAlignment(.center)
+                        .focused($isFocused)
+                        .textInputAutocapitalization(.characters)
+                        .disableAutocorrection(true)
                         .foregroundColor(.black)
-                        .tint(.blue) // 커서 색상
+                        .tint(.blue)
                         .frame(height: 50)
                         .minimumScaleFactor(0.5)
                 }
+                .padding(.horizontal, 20)
                 
-                // 바코드 UI
+                // 하단 바코드
                 HStack(spacing: 4) {
                     ForEach(0..<15) { _ in
                         Rectangle()
@@ -105,9 +103,10 @@ struct RunnerBibView: View {
                     }
                 }
                 .opacity(0.3)
+                .padding(.bottom, 5) // 하단에 살짝 여백 추가
             }
-            .padding(.vertical, 30)
-            .frame(width: 280)
+            // 불필요한 추가 패딩 없음
+            .frame(width: cardWidth)
         }
     }
 }

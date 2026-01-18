@@ -32,22 +32,13 @@ struct GenderView: View {
             
             BackButtonHeader()
             
-            .padding(.horizontal, 24)
-            .padding(.top, 10)
-            
-            VStack(spacing: 40) {
+            VStack(spacing: 0) {
+                Spacer()
                 
-                // 2. 타이틀
-                VStack(spacing: 10) {
-                    Text("성별을 선택해주세요")
-                        .font(.system(size: 26, weight: .bold))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(5)
-                    
-                    Text("러닝 데이터 분석에 필요해요")
-                        .font(.body)
-                        .foregroundColor(.gray)
-                }
+                OnboardingTitleView(
+                    title: "성별을 선택해주세요",
+                    subTitle: "러닝 데이터 분석에 필요해요"
+                )
                 .padding(.top, 30)
                 
                 Spacer()
@@ -70,27 +61,20 @@ struct GenderView: View {
                 .padding(.horizontal, 20)
                 
                 Spacer()
+                Spacer()
                 
             } // 최상위 부모 VStack
+            
             .padding(.horizontal, 24)
             
-            // 하단버튼 ( 가입 완료 )
+            // 하단버튼
             VStack {
-                Button(action: { finishJoin() }) {
-                    HStack(spacing:8) {
-                        Text("가입 완료")
-                            .font(.headline).fontWeight(.bold)
-                        Text("3 / 3")
-                            .font(.subheadline).opacity(0.7)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(selectedGender != nil ? Color.blue : Color.gray.opacity(0.3))
-                    .cornerRadius(16)
-                    .shadow(color: selectedGender != nil ? Color.blue.opacity(0.3) : Color.clear, radius: 10, x:0, y:5)
-                }
-                .disabled(selectedGender == nil) // 선택 안 하면 못 넘어감
+                BottomStepButton(
+                    title: "가입 완료",
+                    currentStep: 3,
+                    isEnabled: selectedGender != nil,
+                    action: finishJoin
+                )
             } // 자식 VStack
             .padding(.horizontal, 24)
             .padding(.bottom, 10)
@@ -107,7 +91,7 @@ struct GenderView: View {
         
         print("최종 데이터 확인: \(viewModel.email), \(viewModel.nickname), \(viewModel.birthDate), \(viewModel.gender)")
         
-        // 서버 통신 요청(LoginViewMopdel에 함수가 있다고 가정)
+        // 서버 통신 요청(LoginViewModel에 함수가 있다고 가정)
         // viewModel.requestJoin()
     }
 }

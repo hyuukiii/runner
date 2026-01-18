@@ -63,7 +63,7 @@ struct LocationSettingView: View {
                     // 완료 버튼
                     Button(action: {
                         if !locationVM.dongName.isEmpty {
-                            completeSetting()
+                           goNext()
                         }
                     }) {
                         Text("시작하기")
@@ -95,14 +95,15 @@ struct LocationSettingView: View {
         }
     }
     
-    private func completeSetting() {
+    private func goNext() {
         print("최종 선택: \(locationVM.dongName)")
-        UserManager.shared.currentUserId = 1
-        viewModel.navigationPath = []
+        
+        // 닉네임 설정 화면으로 이동
+        viewModel.navigationPath.append(.nickname)
     }
 }
 
-// ✨ " . . . " 깜빡이는 애니메이션 뷰
+// MARK: " . . . " 깜빡이는 애니메이션 뷰
 struct BlinkingDots: View {
     @State private var isActive = false
     
@@ -120,12 +121,13 @@ struct BlinkingDots: View {
     }
 }
 
-// 둥근 모서리 확장
+// MARK: 둥근 모서리 확장
 extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
     }
 }
+
 
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
