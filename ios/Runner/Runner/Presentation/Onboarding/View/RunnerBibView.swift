@@ -21,23 +21,26 @@ struct RunnerBibView: View {
     
     var body: some View {
         ZStack {
-            // 배경 (높이 적용)
+            // MARK: - 배경
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 .frame(width: cardWidth, height: cardHeight)
             
-            // 2. 모서리 구멍 디테일
+            // MARK: - 모서리 구멍
             VStack {
                 HStack { Circle().frame(width: 12); Spacer(); Circle().frame(width: 12) }
+                
                 Spacer()
+                
                 HStack { Circle().frame(width: 12); Spacer(); Circle().frame(width: 12) }
             }
+            
             .foregroundColor(Color.gray.opacity(0.2))
             .padding(15)
             .frame(width: cardWidth, height: cardHeight)
             
-            // 3. 콘텐츠 (간격 조정)
+            // MARK: - 콘텐츠
             // 내부 요소 간격을 20에서 15로 줄여서 공간 절약
             VStack(spacing: 15) {
                 Text("RUNNING MATE")
@@ -53,7 +56,7 @@ struct RunnerBibView: View {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFill()
-                                .frame(width: 120, height: 120)
+                                .frame(width: 80, height: 80)
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.gray.opacity(0.1), lineWidth: 1))
                         } else {

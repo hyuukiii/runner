@@ -30,12 +30,15 @@ struct NicknameSettingView: View {
         else { return 1.0 }
     }
     
+    
     var body: some View {
         ZStack {
+            
             // 배경 터치 시 키보드 내리기
             Color.white.ignoresSafeArea()
                 .onTapGesture { isFocused = false }
             
+            // MARK: - 메인 콘텐츠
             VStack(spacing: 0) {
                 
                 // 헤더
@@ -51,59 +54,77 @@ struct NicknameSettingView: View {
                         title: "나만의 러너 카드를 만들어보세요",
                         subTitle: "사진과 닉네임을 눌러 수정할 수 있어요"
                     )
-                    .layoutPriority(1)
-                    .padding(.bottom, uiScale < 1.0 ? 10 : 30)
                     
-                    // MARK: - 러너 카드
-                    RunnerBibView(
-                        nickname: $nickname,
-                        image: viewModel.profileImage,
-                        selectedItem: $selectedItem,
-                        isFocused: $isFocused,
-                        onImageChange: { data in
-                            if let uiImage = UIImage(data: data) {
-                                Task { @MainActor in
-                                    viewModel.profileImage = uiImage
-                                    HapticManager.instance.impact(style: .light)
+                    // .layoutPriority(1)
+                    // .padding(.bottom, uiScale < 1.0 ? 10 : 30)
+                    
+                    Spacer()
+                    
+                    VStack(spacing: 0) {
+                        // MARK: - 러너 카드
+                        RunnerBibView(
+                            nickname: $nickname,
+                            image: viewModel.profileImage,
+                            selectedItem: $selectedItem,
+                            isFocused: $isFocused,
+                            onImageChange: { data in
+                                if let uiImage = UIImage(data: data) {
+                                    Task { @MainActor in
+                                        viewModel.profileImage = uiImage
+                                        HapticManager.instance.impact(style: .light)
+                                    }
                                 }
                             }
+                        )
+                        .scaleEffect(uiScale) // 화면 작으면 축소
+                        .frame(width: 280 * uiScale, height: 340 * uiScale) // 실제 차지하는 공간 축소
+                        .onChange(of: nickname) { newValue in
+                            handleNicknameChange(newValue)
                         }
-                    )
-                    .scaleEffect(uiScale) // 화면 작으면 축소
-                    .frame(width: 280 * uiScale, height: 340 * uiScale) // 실제 차지하는 공간 축소
-                    .onChange(of: nickname) { newValue in
-                        handleNicknameChange(newValue)
-                    }
-                    .onChange(of: isFocused) { focused in
-                        if !focused && !isValid && !nickname.isEmpty {
-                            HapticManager.instance.notification(type: .error)
-                            withAnimation(.default) { shakeTrigger += 1 }
-                        }
-                    }
-                    
-                    .modifier(ShakeEffect(animatableData: shakeTrigger))
-                    
-                    // MARK: - 하단 메시지
-                    HStack(spacing: 10) {
-                        if !nickname.isEmpty && !isValid {
-                            Image(systemName: "exclamationmark.circle.fill").foregroundColor(.red)
-                            Text("2글자 이상 입력해주세요").foregroundColor(.red)
-                        } else if isValid {
-                            Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
-                            Text("멋진 닉네임이에요!").foregroundColor(.green)
-                        } else {
-                            Text("닉네임은 최대 10글자까지 가능해요").foregroundColor(.gray.opacity(0.5))
+                        .onChange(of: isFocused) { focused in
+                            if !focused && !isValid && !nickname.isEmpty {
+                                HapticManager.instance.notification(type: .error)
+                                withAnimation(.default) { shakeTrigger += 1 }
+                            }
                         }
                         
-                        Spacer()
+                        .modifier(ShakeEffect(animatableData: shakeTrigger))
+                        .zIndex(1) // 카드가 메시지보다 위에 오도록
                         
-                        Text("\(nickname.count) / 10").foregroundColor(isValid ? .gray : .gray.opacity(0.5))
+                        // MARK: - 하단 메시지
+                        HStack(alignment: .center, spacing: 6) {
+                            
+                             // 화살표 아이콘 추가
+                            Image(systemName: "arrow.turn.down.right")
+                                .font(.system(size: 12, weight: .light))
+                                .foregroundColor(.gray.opacity(0.5))
+                                .padding(.bottom, 2)
+                            
+                            Group {
+                                if !nickname.isEmpty && !isValid {
+                                    Image(systemName: "exclamationmark.circle.fill").foregroundColor(.red)
+                                    Text("2글자 이상 가능해요").foregroundColor(.red)
+                                } else if isValid {
+                                    Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                                    Text("멋진 닉네임이에요!").foregroundColor(.green)
+                                    
+                                }  else {
+                                    Text("닉네임을 만들어 보세요!").foregroundColor(.gray.opacity(0.5))
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            Text("\(nickname.count) / 10")
+                                .foregroundColor(isValid ? .gray : .gray.opacity(0.5))
+                                .monospacedDigit()
+                        }
+                        .font(.system(size: 10, weight: .light) )
+                        .padding(.horizontal, 10)
+                        .frame(width: 230 * uiScale)
+                        .padding(.top, -10)
+                        .animation(.easeInOut, value: isValid)
                     }
-                    
-                    .font(.system(size: 10, weight: .light) )
-                    .padding(.top, 2)
-                    .padding(.horizontal, 55)
-                    .animation(.easeInOut, value: isValid)
                     
                     Spacer() // 아래쪽 여백 자동 조절
                 }
