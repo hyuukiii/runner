@@ -42,7 +42,7 @@ public class User {
     private Gender gender;
 
     @Column(nullable = false)
-    private Integer birthYear; // 나이 계산용
+    private LocalDate birthDate; // 나이 계산용
 
     @Column(length = 30)
     private String region; // 활동 지역

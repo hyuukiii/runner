@@ -82,7 +82,7 @@ struct GenderView: View {
         .navigationBarBackButtonHidden(true)
     }
     
-    // 가입 요청 로직
+    // MARK: 가입 요청 로직
     private func finishJoin() {
         guard let gender = selectedGender else { return }
         
@@ -92,8 +92,20 @@ struct GenderView: View {
         print("최종 데이터 확인: \(viewModel.email), \(viewModel.nickname), \(viewModel.birthDate), \(viewModel.gender)")
         
         // 서버 통신 요청(LoginViewModel에 함수가 있다고 가정)
-        // viewModel.requestJoin()
-    }
+        Task {
+            let isSuccess = await viewModel.requestJoin();
+            
+            if isSuccess {
+                print("가입 완료 메인페이지로 이동")
+                // TODO: 로그인 상태를 true로 변경하여 ContentView에서 MatchingView로 넘어가게 처리
+                // 예: UserManager.shared.isLoggedIn = true
+            } else {
+                print("가입 실패 에러 메시지를 띄워주세요")
+            }
+        }
+    } //finishJoin
+    
+    
 }
 
 // MARK: - 성별 선택 카드 컴포넌트

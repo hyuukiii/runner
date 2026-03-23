@@ -98,6 +98,9 @@ struct LocationSettingView: View {
     private func goNext() {
         print("최종 선택: \(locationVM.dongName)")
         
+        // 지도에서 찾은 동네 이름을 LocationViewModel에 저장
+        viewModel.region = locationVM.dongName
+        
         // 닉네임 설정 화면으로 이동
         viewModel.navigationPath.append(.nickname)
     }
